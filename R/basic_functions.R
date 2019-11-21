@@ -1,3 +1,14 @@
+thetas_to_priors <- function(thetas, n2) {
+  b <- 5*exp(thetas[[1]])*(1-exp(-exp(thetas[[2]])/sqrt(0:(n2-1))))
+  a <- rep(6,n2)
+  tempor <- exp(-exp(thetas[[3]])*(1:30))
+  m <- which(tempor < 1e-03)[1]-1
+  if(is.na(m) | m<2){m <- 2}
+  g <- matrix(tempor[1:m], nc=m, nr=n2, byrow = T)
+  g <- g / (b/(a-1))
+  return(list(a,b,g))
+}
+
 create_data <- function(covar_true,N) {
   
   #Lazy creation of data
