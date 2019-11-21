@@ -6,6 +6,69 @@
 
 using namespace Rcpp;
 
+// na_omitc
+arma::vec na_omitc(arma::vec x);
+RcppExport SEXP _NPVecchia_na_omitc(SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(na_omitc(x));
+    return rcpp_result_gen;
+END_RCPP
+}
+// thetas_to_priors_c
+List thetas_to_priors_c(const arma::vec& thetas, const int n2, const double thresh);
+RcppExport SEXP _NPVecchia_thetas_to_priors_c(SEXP thetasSEXP, SEXP n2SEXP, SEXP threshSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type thetas(thetasSEXP);
+    Rcpp::traits::input_parameter< const int >::type n2(n2SEXP);
+    Rcpp::traits::input_parameter< const double >::type thresh(threshSEXP);
+    rcpp_result_gen = Rcpp::wrap(thetas_to_priors_c(thetas, n2, thresh));
+    return rcpp_result_gen;
+END_RCPP
+}
+// samp_posts_c
+arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray);
+RcppExport SEXP _NPVecchia_samp_posts_c(SEXP postsSEXP, SEXP NNarraySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type posts(postsSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type NNarray(NNarraySEXP);
+    rcpp_result_gen = Rcpp::wrap(samp_posts_c(posts, NNarray));
+    return rcpp_result_gen;
+END_RCPP
+}
+// minus_loglikeli_c
+double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray, const double N);
+RcppExport SEXP _NPVecchia_minus_loglikeli_c(SEXP thetasSEXP, SEXP datumSEXP, SEXP NNarraySEXP, SEXP NSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type thetas(thetasSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type datum(datumSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type NNarray(NNarraySEXP);
+    Rcpp::traits::input_parameter< const double >::type N(NSEXP);
+    rcpp_result_gen = Rcpp::wrap(minus_loglikeli_c(thetas, datum, NNarray, N));
+    return rcpp_result_gen;
+END_RCPP
+}
+// minus_loglikeli_c2
+double minus_loglikeli_c2(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray);
+RcppExport SEXP _NPVecchia_minus_loglikeli_c2(SEXP thetasSEXP, SEXP datumSEXP, SEXP NNarraySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type thetas(thetasSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type datum(datumSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type NNarray(NNarraySEXP);
+    rcpp_result_gen = Rcpp::wrap(minus_loglikeli_c2(thetas, datum, NNarray));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rcpparma_hello_world
 arma::mat rcpparma_hello_world();
 RcppExport SEXP _NPVecchia_rcpparma_hello_world() {
@@ -51,6 +114,11 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_NPVecchia_na_omitc", (DL_FUNC) &_NPVecchia_na_omitc, 1},
+    {"_NPVecchia_thetas_to_priors_c", (DL_FUNC) &_NPVecchia_thetas_to_priors_c, 3},
+    {"_NPVecchia_samp_posts_c", (DL_FUNC) &_NPVecchia_samp_posts_c, 2},
+    {"_NPVecchia_minus_loglikeli_c", (DL_FUNC) &_NPVecchia_minus_loglikeli_c, 4},
+    {"_NPVecchia_minus_loglikeli_c2", (DL_FUNC) &_NPVecchia_minus_loglikeli_c2, 3},
     {"_NPVecchia_rcpparma_hello_world", (DL_FUNC) &_NPVecchia_rcpparma_hello_world, 0},
     {"_NPVecchia_rcpparma_outerproduct", (DL_FUNC) &_NPVecchia_rcpparma_outerproduct, 1},
     {"_NPVecchia_rcpparma_innerproduct", (DL_FUNC) &_NPVecchia_rcpparma_innerproduct, 1},
