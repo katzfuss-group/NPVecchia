@@ -145,13 +145,30 @@ get_posts <- function(x, a, b, g, NNarray) {
   return(list(a_post, b_post, muhat_post, G_post))
 }
 
+#' Creates posterior mean sparse matrix from posteriors
+#' 
+#' This function uses the posterior arguments to create a posterior mean estimate of the Cholesky of
+#' the precision matrix. This function creates the Bayesian version of get_mle or its variants.
+#'
+#' @param posts a List of the posteriors from get_posts (or get_posts_c); alternatively it can be
+#' custom values as long as the sizes match the output from get_posts.
+#' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
+#' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
+#' for nearest to furthest. It is OK to have m2 large, as it will be reduced to match the size
+#' of the posterior means (i.e. number of columns in the third element of the posteriors).
+#'
+#' @return Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 
+#' such that \deqn{\Omega = U U'}
+#' @export
+#'
+#' @examples
 samp_posts <- function(posts, NNarray) {
   n2 <- nrow(NNarray)
-  m <- ncol(NNarray)
+  m <- ncol(posts[[3]])
   d <- (1/sqrt(posts[[2]][1])) * exp(lgamma((2 * posts[[1]][1] + 1)/2) - lgamma(posts[[1]][1]))
   uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n2, n2), triangular = TRUE)
   for (i in 2:n2) {
-    gind <- na.omit(NNarray[i, ])
+    gind <- na.omit(NNarray[i, 1:m])
     nn <- length(gind)
     # d <- rinvgamma(mcl, posts[[1]][i], posts[[2]][i])
     uhat[i, i] <- (1/sqrt(posts[[2]][i])) * exp(lgamma((2 * posts[[1]][i] + 1)/2) - lgamma(posts[[1]][i]))
