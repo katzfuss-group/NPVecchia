@@ -11,11 +11,11 @@
 #'
 #' @return List of priors, where 
 #' 
-#' the first is a vector of length n2 containing the shape parameters of the IG prior on the variances, 
+#' the first element is a vector of length n2 containing the shape parameters of the IG prior on the variances, 
 #' 
-#' the second is similarly of length n2 containing the corresponding scale parameters, and 
+#' the second element similarly is of length n2 containing the corresponding scale parameters, and 
 #' 
-#' the last is a matrix of dimension n2 * m, where each row contains the prior
+#' the last element is an n2 * m matrix, where each row contains the prior
 #' variances for the regression coefficients (i.e. the diagonal of the prior covariance matrix)
 #' @export
 #'
@@ -54,7 +54,7 @@ create_data <- function(covar_true, N) {
 #' @param dat an N * n matrix, where each row corresponds to N replications for that location
 #' @param NNarray an n * m matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
-#' for nearest to furthest
+#' for nearest to furthest. Required: m < N
 #'
 #' @return Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 
 #' such that \deqn{\Omega = U U'}
@@ -75,6 +75,47 @@ get_mle <- function(dat, NNarray) {
   return(uhat)
 }
 
+#' Gets posteriors of Bayesian methodology
+#' 
+#' Given the priors calculated using thetas_to_priors, this function calculates the posterior 
+#' distributions of the regression errors and coefficients.
+#'
+#' @param x an N * n matrix of the data (N replications of n locations/variables)
+#' @param a vector of length n of IG scale priors (thetas_to_priors()[[1]])
+#' @param b vector of length n of IG shape priors (thetas_to_priors()[[2]])
+#' @param g matrix of dimension n * m of prior coefficient variances (thetas_to_priors()[[3]])
+#' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
+#' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
+#' for nearest to furthest. It is OK to have m2 > m, as it will be reduced to match the size
+#' of the matrix g.
+#'
+#' @return List of posterior arguments, where
+#' 
+#' the first element is a vector of length n containing the posterior of the IG shape parameters,
+#' 
+#' the second element is a vector of length n2containing the posteriors of the IG scale parameters,
+#' 
+#' the third element is an n * m matrix, where each row contains the posterior mean of the regression
+#' coefficients (and if there are less than m, NAs fill the rest of the row),
+#' 
+#' the last element is an m * m \* n array, where each of the n slices contains the posterior variances
+#' of the regression coefficients (and if there are less than m, NAs fill the rest of the slice)
+#' 
+#' @export
+#'
+#' @examples
+#' 
+#' #create fake data and fake neighbor matrix
+#' data <- matrix(rnorm(1e4), nrow = 10)
+#' NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
+#' #can only use previous points in ordering (this is actually impossible in low dimensional space like this is designed for)
+#' for(i in 1:100){
+#'   NNarray[i:1e3,i] <- i
+#' }
+#' priors <- thetas_to_priors(c(1, 1, 1), 1e3)
+#' 
+#' posteriors <- get_posts(data, priors[[1]], priors[[2]], priors[[3]], NNarray)
+#' 
 get_posts <- function(x, a, b, g, NNarray) {
   n2 <- ncol(x)
   N <- nrow(x)
