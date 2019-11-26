@@ -36,41 +36,61 @@ List thetas_to_priors_c(const arma::vec& thetas, const int n2, const double thre
   return List::create(a, b, g);
 }
 
-// // [[Rcpp::export]]
-// List get_posts2_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b, 
-// 				const arma::vec& g, const arma::mat& NNarray) {
-//   int n2 = arma::as_scalar(NNarray.n_rows);
-//   int N = arma::as_scalar(datum.n_rows);
-//   int m = arma::as_scalar(g.n_rows);
-//   arma::vec a_post = arma::zeros(n2);
-//   arma::vec b_post = arma::zeros(n2); 
-//   arma::mat muhat_post = arma::zeros(n2, m);
-//   arma::cube G_post(m, m, n2, fill::zeros);
-//   a_post.fill(a(0) + N/2.0);
-//   b_post(0) = b(0) + arma::as_scalar(datum.col(0).t() * datum.col(0)) / 2.0;
-//   for (int i = 1; i < n2; i++) {
-// 	  arma::vec gind = na_omitc(NNarray.row(i).head(m).t());
-// 	  int nn = arma::as_scalar(gind.n_elem);
-// 	  arma::mat xi = -datum.cols(conv_to<uvec>::from(gind));
-//     arma::vec yi = datum.col(i);
-//     arma::mat Ginv = xi.t() * xi + diagmat(1 / g.row(i).head(nn));
-// 	  arma::mat Ginv_chol = arma::chol(Ginv);
-// 	  arma::vec temp_mu, muhat;
-// 	  bool status = solve(temp_mu, Ginv_chol.t(),xi.t() * yi);
-// 	  if (! status){
-// 	    muhat = pinv(Ginv) * (xi.t() * yi);
-// 	  } else {
-// 	    bool status2 = solve(muhat, Ginv_chol, temp_mu);
-// 	    if (!status2){
-// 	      muhat = pinv(Ginv)*(xi.t() * yi);
-// 	    }
-// 	  }
-// 	  // muhat_post.row(i).head(nn) = muhat.t();
-// 	  // G_post(span(0, nn-1), span(0, nn-1), span(i,i)) = Ginv_chol;
-// 	  b_post(i) = b(i) + arma::as_scalar(yi.t() * yi - muhat.t() * Ginv * muhat) / 2.0;
-//   }
-//   return List::create(a_post, b_post, muhat_post, G_post);
-// }
+// [[Rcpp::export]]
+List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
+                  const arma::mat& g, const arma::mat& NNarray) {
+  // n2, N, m as usual: number of locations, number of replications and number of neighbors
+  int n2 = arma::as_scalar(NNarray.n_rows);
+  int N = arma::as_scalar(datum.n_rows);
+  int m = arma::as_scalar(g.n_cols);
+  // initialize posteriors of correct sizes
+  // IG posterior(a_post, b_post) on variance of regressions
+  arma::vec a_post = arma::zeros(n2);
+  arma::vec b_post = arma::zeros(n2);
+  // normal mean (muhat_post) and variances (G_post where each slice is for one regression) of regression coefficients
+  arma::mat muhat_post = arma::zeros(n2, m);
+  arma::cube G_post(m, m, n2, fill::zeros);
+  // a and a_post are constant in our set-up
+  a_post.fill(a(0) + N/2.0);
+  b_post(0) = b(0) + arma::as_scalar(datum.col(0).t() * datum.col(0)) / 2.0;
+  // loop through all regressions
+  for (int i = 1; i < n2; i++) {
+    // get neighbor indices
+    arma::vec gind = na_omitc(NNarray.row(i).head(m).t());
+    // nn: number of neighbors
+    int nn = arma::as_scalar(gind.n_elem);
+    // set-up regression as Yi ~ Xi
+    arma::mat xi = -datum.cols(conv_to<uvec>::from(gind));
+    arma::vec yi = datum.col(i);
+    // get inverse of G_post in closed form
+    arma::mat Ginv = xi.t() * xi + diagmat(1 / g.row(i).head(nn));
+    // get Cholesky
+    arma::mat Ginv_chol = arma::chol(Ginv);
+    // tryCATCH version of this double solve to get the posterior mean of the coefficients
+    // arma::vec muhat = solve(Ginv_chol, solve(Ginv_chol.t(), xi.t() * yi));
+    arma::vec temp_mu, muhat;
+    // see if solve(Ginv_chol.t(), xi.t() * yi) works
+    bool status = solve(temp_mu, Ginv_chol.t(),xi.t() * yi);
+    // if solve fails, use generalized inverse to calculate G*X'*y
+    if (! status){
+      muhat = pinv(Ginv) * (xi.t() * yi);
+    } else {
+      // see if solve(Ginv_chol, temp_mu) fails
+      bool status2 = solve(muhat, Ginv_chol, temp_mu);
+      // if this solve fails, use generalized inverse to calculate G*X'*y
+      if (!status2){
+        muhat = pinv(Ginv)*(xi.t() * yi);
+      }
+    }
+    // fill in posteriors for returning
+    muhat_post.row(i).head(nn) = muhat.t();
+    G_post(span(0, nn-1), span(0, nn-1), span(i,i)) = Ginv_chol;
+    // calculate b_post(i)
+    b_post(i) = b(i) + arma::as_scalar(yi.t() * yi - muhat.t() * Ginv * muhat) / 2.0;
+  }
+  // return the posteriors
+  return List::create(a_post, b_post, muhat_post, G_post);
+}
 
 // [[Rcpp::export]]
 arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
