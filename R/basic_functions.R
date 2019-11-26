@@ -46,6 +46,21 @@ create_data <- function(covar_true, N) {
   return(datum)
 }
 
+#' Creates the simplist frequentist version of our method
+#' 
+#' For each regression, the MLE is used (i.e. the coefficients and residual standard error obtained from lm). 
+#' This will only work when N > m (or lm will have issues), so call the function accordingly.
+#'
+#' @param dat an N * n matrix, where each row corresponds to N replications for that location
+#' @param NNarray an n * m matrix giving the m nearest neighbors previous in the ordering (or 
+#' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
+#' for nearest to furthest
+#'
+#' @return Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 
+#' such that \deqn{\Omega = U U'}
+#' @export
+#'
+#' @examples
 get_mle <- function(dat, NNarray) {
   n2 <- ncol(dat)
   d <- 1/sqrt(sd(dat[, 1]))
@@ -53,7 +68,7 @@ get_mle <- function(dat, NNarray) {
   for (i in 2:n2) {
     gind <- na.omit(NNarray[i, ])
     temp <- lm(dat[, i] ~ -1 + dat[, gind])
-    d <- 1/sd(resid(temp))
+    d <- 1/(summary.lm(temp)$sigma)
     uhat[i, i] <- d
     uhat[gind, i] <- -coef(temp) * d
   }
