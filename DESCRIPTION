@@ -12,3 +12,4 @@ Imports:
   Matrix,
   Rcpp (>= 1.0.1)
 LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.0.0

@@ -1,3 +1,31 @@
+#' Transforms hyperparameters to priors
+#'
+#' This function creates the priors on the variance and coefficients of the regressions from the three
+#' hyperparameters described in the mathematical description. The coefficients are assumed to have zero
+#' mean apriori, so only three prior elements are returned (the variance shape/scale, and the coefficnet variances).
+#'
+#' @param thetas 3 real numbers representing the log of the three hyperparameters
+#' @param n2 the number of locations
+#' @param thresh the threshold for determining the number of neighbors based on the third
+#' hyperparameter, defaults to 1e-3 
+#'
+#' @return List of priors, where 
+#' 
+#' the first is a vector of length n2 containing the shape parameters of the IG prior on the variances, 
+#' 
+#' the second is similarly of length n2 containing the corresponding scale parameters, and 
+#' 
+#' the last is a matrix of dimension n2 * m, where each row contains the prior
+#' variances for the regression coefficients (i.e. the diagonal of the prior covariance matrix)
+#' @export
+#'
+#' @examples
+#' 
+#' thetas_ex <- c(1,1,1)
+#' thetas_to_priors(thetas_ex, 100)
+#' 
+#' #with smaller threshold (leading to larger number of neighbors)
+#' thetas_to_priors(thetas_ex, 500, thresh=1e-6)
 thetas_to_priors <- function(thetas, n2, thresh = 1e-3) {
   b <- 5 * exp(thetas[[1]]) * (1 - exp(-exp(thetas[[2]])/sqrt(0:(n2 - 1))))
   a <- rep(6, n2)
