@@ -34,12 +34,17 @@ arma::vec na_omit_c(arma::vec x){
   return r;
 }
 
+//' Transforms hyperparameters to priors
+//' 
+//' This is the C++ version of \code{\link{thetas_to_priors}}. See there for further documentation.
+//' 
+//' It is often about the same speed as the R version of this function due to little computational cost.
 // [[Rcpp::export]]
-List thetas_to_priors_c(const arma::vec& thetas, const int n2, const double thresh = 1e-3) {
+List thetas_to_priors_c(const arma::vec& thetas, const int n, const double thresh = 1e-3) {
   // IG priors scale vector (prior on variances)
-  arma::vec b = 5.0 * exp(thetas(0)) * (1 - exp(-exp(thetas(1)) / sqrt(arma::linspace(0, n2 - 1, n2))));
+  arma::vec b = 5.0 * exp(thetas(0)) * (1 - exp(-exp(thetas(1)) / sqrt(arma::linspace(0, n - 1, n))));
   // IG priors shape vector (prior on variances)
-  arma::vec a = 6.0 * arma::ones(n2);
+  arma::vec a = 6.0 * arma::ones(n);
   // temporary vector to determine number of neighbors based on threshold
   // (500 is chosen as an arbitrarily large number for finding the threshold)
   arma::vec tempor = exp(-exp(thetas(2)) * arma::linspace(1, 500, 500));
@@ -52,7 +57,7 @@ List thetas_to_priors_c(const arma::vec& thetas, const int n2, const double thre
   // only consider first m elements of tempor
   arma::vec temp = tempor(m);
   // create matrix where each row is temp for the coefficient prior variances
-  arma::mat g = arma::zeros(n2, arma::as_scalar(temp.n_elem));
+  arma::mat g = arma::zeros(n, arma::as_scalar(temp.n_elem));
   g.each_row() += temp.t();
   // divide by mean of IG prior (variances) for simplicity of conjugate derivations
   g.each_col() /= (b / (a - 1));

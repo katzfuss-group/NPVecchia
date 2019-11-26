@@ -18,15 +18,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // thetas_to_priors_c
-List thetas_to_priors_c(const arma::vec& thetas, const int n2, const double thresh);
-RcppExport SEXP _NPVecchia_thetas_to_priors_c(SEXP thetasSEXP, SEXP n2SEXP, SEXP threshSEXP) {
+List thetas_to_priors_c(const arma::vec& thetas, const int n, const double thresh);
+RcppExport SEXP _NPVecchia_thetas_to_priors_c(SEXP thetasSEXP, SEXP nSEXP, SEXP threshSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::vec& >::type thetas(thetasSEXP);
-    Rcpp::traits::input_parameter< const int >::type n2(n2SEXP);
+    Rcpp::traits::input_parameter< const int >::type n(nSEXP);
     Rcpp::traits::input_parameter< const double >::type thresh(threshSEXP);
-    rcpp_result_gen = Rcpp::wrap(thetas_to_priors_c(thetas, n2, thresh));
+    rcpp_result_gen = Rcpp::wrap(thetas_to_priors_c(thetas, n, thresh));
     return rcpp_result_gen;
 END_RCPP
 }

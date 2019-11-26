@@ -15,8 +15,13 @@ na_omit_c <- function(x) {
     .Call(`_NPVecchia_na_omit_c`, x)
 }
 
-thetas_to_priors_c <- function(thetas, n2, thresh = 1e-3) {
-    .Call(`_NPVecchia_thetas_to_priors_c`, thetas, n2, thresh)
+#' Transforms hyperparameters to priors
+#' 
+#' This is the C++ version of \code{\link{thetas_to_priors}}. See there for further documentation.
+#' 
+#' It is often about the same speed as the R version of this function due to little computational cost.
+thetas_to_priors_c <- function(thetas, n, thresh = 1e-3) {
+    .Call(`_NPVecchia_thetas_to_priors_c`, thetas, n, thresh)
 }
 
 get_posts_c <- function(datum, a, b, g, NNarray) {
