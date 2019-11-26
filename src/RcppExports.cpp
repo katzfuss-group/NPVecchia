@@ -6,14 +6,14 @@
 
 using namespace Rcpp;
 
-// na_omitc
-arma::vec na_omitc(arma::vec x);
-RcppExport SEXP _NPVecchia_na_omitc(SEXP xSEXP) {
+// na_omit_c
+arma::vec na_omit_c(arma::vec x);
+RcppExport SEXP _NPVecchia_na_omit_c(SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(na_omitc(x));
+    rcpp_result_gen = Rcpp::wrap(na_omit_c(x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -115,7 +115,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_NPVecchia_na_omitc", (DL_FUNC) &_NPVecchia_na_omitc, 1},
+    {"_NPVecchia_na_omit_c", (DL_FUNC) &_NPVecchia_na_omit_c, 1},
     {"_NPVecchia_thetas_to_priors_c", (DL_FUNC) &_NPVecchia_thetas_to_priors_c, 3},
     {"_NPVecchia_get_posts_c", (DL_FUNC) &_NPVecchia_get_posts_c, 5},
     {"_NPVecchia_samp_posts_c", (DL_FUNC) &_NPVecchia_samp_posts_c, 2},

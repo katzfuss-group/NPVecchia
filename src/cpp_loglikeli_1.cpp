@@ -4,9 +4,18 @@ using namespace Rcpp;
 using namespace std;
 using namespace arma;
 
-// taken from stack overflow approximately: https://stackoverflow.com/questions/19156353/remove-na-values-efficiently
+//' Remove NAs from a vector
+//'
+//' This function is needed for the direct translation of the R functions to C++. This function is 
+//' taken from StackOverflow approximately: https://stackoverflow.com/questions/19156353/remove-na-values-efficiently
+//'
+//' @param x a vector (possibly with NAs)
+//' 
+//' @export
+//' @examples
+//' na_omit_c(c(NA,5,10,NA,303))
 // [[Rcpp::export]]
-arma::vec na_omitc(arma::vec x){
+arma::vec na_omit_c(arma::vec x){
   // make placeholder vector r
   arma::vec r(x.size());
   // make counter for number of non-NAs
@@ -71,7 +80,7 @@ List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
   // loop through all regressions
   for (int i = 1; i < n2; i++) {
     // get neighbor indices
-    arma::vec gind = na_omitc(NNarray.row(i).head(m).t());
+    arma::vec gind = na_omit_c(NNarray.row(i).head(m).t());
     // nn: number of neighbors
     int nn = arma::as_scalar(gind.n_elem);
     // set-up regression as Yi ~ Xi
@@ -123,7 +132,7 @@ arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
   uhat(0,0) = (1.0 / sqrt(bp(0))) * exp(lgamma((2.0 * ap(0) + 1.0) / 2.0) - lgamma(ap(0)));
   for (int i = 1; i < n2; i++) {
     // get neighbor indices
-    arma::vec gind = na_omitc(NNarray.row(i).head(m).t());
+    arma::vec gind = na_omit_c(NNarray.row(i).head(m).t());
     // get 1/sqrt(error) posterior mean and put it on the diagonal
     double tempd = 1.0 / sqrt(bp(i)) * exp(lgamma((2.0 * ap(i) + 1.0) / 2.0) - lgamma(ap(i)));
     uhat(i,i) = tempd;
@@ -152,7 +161,7 @@ double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const 
   double ll = 6.0 * log(b(0)) - ap * log(b(0) + arma::accu(pow(datum.col(0), 2)) / 2);
   for (int i  = 1; i < n2; i++){
     // get m nearest neighbors
-    arma::vec gind = na_omitc(NNarray.row(i).head(m).t());
+    arma::vec gind = na_omit_c(NNarray.row(i).head(m).t());
     // get Xi for regression
     arma::mat xi = -datum.cols(conv_to<uvec>::from(gind));
     // get yi for regression (response)
