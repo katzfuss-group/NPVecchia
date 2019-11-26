@@ -103,7 +103,8 @@ get_mle <- function(dat, NNarray) {
 #' #create fake data and fake neighbor matrix
 #' data <- matrix(rnorm(1e4), nrow = 10)
 #' NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
-#' #can only use previous points in ordering (this is actually impossible in low dimensional space like this is designed for)
+#' #can only use previous points in ordering (this is actually 
+#' #impossible in low dimensional space like this is designed for)
 #' for(i in 1:100){
 #'   NNarray[i:1e3,i] <- i
 #' }
@@ -117,7 +118,7 @@ get_posts <- function(x, a, b, g, NNarray) {
   m <- ncol(g)
   a_post <- rep(0, n2)
   b_post <- rep(0, n2)
-  muhat_post <- matrix(NA, nr = n2, nc = m)
+  muhat_post <- matrix(NA, nrow = n2, ncol = m)
   G_post <- array(NA, dim = c(m, m, n2))
   a_post <- a + N/2
   b_post[1] <- b[1] + t(x[, 1] %*% x[, 1])/2
@@ -199,10 +200,10 @@ minus_loglikeli <- function(x, datum, NNarray, N) {
       show(i)
       break
     })
-    # Ginv <- crossprod(xi) + diag(g[i,1:nn]^(-1),nrow=nn)
+    # Ginv <- crossprod(xi) + diag(g[i,1:nn]^(-1), nrow = nn)
     Ginv_chol <- chol(Ginv)
-    # G <- ginv(Ginv) muhat <- G%*%t(xi)%*%yi muhat <- solve(Ginv_chol,
-    # solve(t(Ginv_chol),initt[[i]][[2]]))
+    # G <- ginv(Ginv); muhat <- G %*% t(xi) %*% yi; muhat <- solve(Ginv_chol,
+    # solve(t(Ginv_chol), initt[[i]][[2]]))
     muhat <- tryCatch({
       solve(Ginv_chol, solve(t(Ginv_chol), crossprod(xi, yi)))
     }, error = function(e) {
