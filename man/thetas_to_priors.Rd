@@ -4,12 +4,12 @@
 \alias{thetas_to_priors}
 \title{Transforms hyperparameters to priors}
 \usage{
-thetas_to_priors(thetas, n2, thresh = 0.001)
+thetas_to_priors(thetas, n, thresh = 0.001)
 }
 \arguments{
 \item{thetas}{3 real numbers representing the log of the three hyperparameters}
 
-\item{n2}{the number of locations}
+\item{n}{the number of locations}
 
 \item{thresh}{the threshold for determining the number of neighbors based on the third
 hyperparameter, defaults to 1e-3}
@@ -31,9 +31,10 @@ mean apriori, so only three prior elements are returned (the variance shape/scal
 }
 \examples{
 
-thetas_ex <- c(1,1,1)
-thetas_to_priors(thetas_ex, 100)
+thetas_ex <- c(1, 1, 1)
+priors <- thetas_to_priors(thetas_ex, 100)
 
 #with smaller threshold (leading to larger number of neighbors)
-thetas_to_priors(thetas_ex, 500, thresh=1e-6)
+priors2 <- thetas_to_priors(thetas_ex, 500, thresh = 1e-6)
+
 }

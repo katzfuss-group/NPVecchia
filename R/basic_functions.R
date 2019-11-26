@@ -5,7 +5,7 @@
 #' mean apriori, so only three prior elements are returned (the variance shape/scale, and the coefficnet variances).
 #'
 #' @param thetas 3 real numbers representing the log of the three hyperparameters
-#' @param n2 the number of locations
+#' @param n the number of locations
 #' @param thresh the threshold for determining the number of neighbors based on the third
 #' hyperparameter, defaults to 1e-3 
 #'
@@ -21,20 +21,21 @@
 #'
 #' @examples
 #' 
-#' thetas_ex <- c(1,1,1)
-#' thetas_to_priors(thetas_ex, 100)
+#' thetas_ex <- c(1, 1, 1)
+#' priors <- thetas_to_priors(thetas_ex, 100)
 #' 
 #' #with smaller threshold (leading to larger number of neighbors)
-#' thetas_to_priors(thetas_ex, 500, thresh=1e-6)
-thetas_to_priors <- function(thetas, n2, thresh = 1e-3) {
-  b <- 5 * exp(thetas[[1]]) * (1 - exp(-exp(thetas[[2]])/sqrt(0:(n2 - 1))))
-  a <- rep(6, n2)
+#' priors2 <- thetas_to_priors(thetas_ex, 500, thresh = 1e-6)
+#' 
+thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
+  b <- 5 * exp(thetas[[1]]) * (1 - exp(-exp(thetas[[2]])/sqrt(0:(n - 1))))
+  a <- rep(6, n)
   tempor <- exp(-exp(thetas[[3]]) * (1:500))
   m <- which(tempor < thresh)[1] - 1
   if (is.na(m) | m < 2) {
     m <- 2
   }
-  g <- matrix(tempor[1:m], nc = m, nr = n2, byrow = T)
+  g <- matrix(tempor[1:m], ncol = m, nrow = n, byrow = T)
   g <- g/(b/(a - 1))
   return(list(a, b, g))
 }
