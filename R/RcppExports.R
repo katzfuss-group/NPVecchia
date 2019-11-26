@@ -9,16 +9,16 @@ thetas_to_priors_c <- function(thetas, n2, thresh = 1e-3) {
     .Call(`_NPVecchia_thetas_to_priors_c`, thetas, n2, thresh)
 }
 
+get_posts_c <- function(datum, a, b, g, NNarray) {
+    .Call(`_NPVecchia_get_posts_c`, datum, a, b, g, NNarray)
+}
+
 samp_posts_c <- function(posts, NNarray) {
     .Call(`_NPVecchia_samp_posts_c`, posts, NNarray)
 }
 
-minus_loglikeli_c <- function(thetas, datum, NNarray, N) {
-    .Call(`_NPVecchia_minus_loglikeli_c`, thetas, datum, NNarray, N)
-}
-
-minus_loglikeli_c2 <- function(thetas, datum, NNarray) {
-    .Call(`_NPVecchia_minus_loglikeli_c2`, thetas, datum, NNarray)
+minus_loglikeli_c <- function(thetas, datum, NNarray) {
+    .Call(`_NPVecchia_minus_loglikeli_c`, thetas, datum, NNarray)
 }
 
 rcpparma_hello_world <- function() {

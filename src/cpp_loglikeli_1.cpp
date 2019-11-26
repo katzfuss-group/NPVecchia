@@ -7,32 +7,47 @@ using namespace arma;
 // taken from stack overflow approximately: https://stackoverflow.com/questions/19156353/remove-na-values-efficiently
 // [[Rcpp::export]]
 arma::vec na_omitc(arma::vec x){
+  // make placeholder vector r
   arma::vec r(x.size());
+  // make counter for number of non-NAs
   int k=0;
   for (unsigned j = 0; j < x.size(); j++){
+    // if not NA, add 1 to counter and set r(j) = x(j)
     if (x(j) == x(j)){
       r(j) = x(j);
       k++;
     }
   }
+  // resize r to non-NA size (removing NAs)
   r.resize(k);
+  // subtract one because C++ indexes from 0 while inputs from R index from 1
   r -= 1.0;
   return r;
 }
 
 // [[Rcpp::export]]
 List thetas_to_priors_c(const arma::vec& thetas, const int n2, const double thresh = 1e-3) {
-  arma::vec b = 5.0*exp(thetas(0))*(1 - exp(-exp(thetas(1)) / sqrt(arma::linspace(0,n2-1,n2))));
-  arma::vec a = 6.0*arma::ones(n2);
-  arma::vec tempor = exp(-exp(thetas(2))*arma::linspace(1,500,500));
+  // IG priors scale vector (prior on variances)
+  arma::vec b = 5.0 * exp(thetas(0)) * (1 - exp(-exp(thetas(1)) / sqrt(arma::linspace(0, n2 - 1, n2))));
+  // IG priors shape vector (prior on variances)
+  arma::vec a = 6.0 * arma::ones(n2);
+  // temporary vector to determine number of neighbors based on threshold
+  // (500 is chosen as an arbitrarily large number for finding the threshold)
+  arma::vec tempor = exp(-exp(thetas(2)) * arma::linspace(1, 500, 500));
+  // m denotes how many nearest neighbors (the indices)
   arma::uvec m = arma::find(tempor > thresh);
+  // if m has less than 2 elements or 500 elements, set m to 2
   if ((m.n_elem + 0.0) == 500) {
     m = m.head(2);
   } else if ((m.n_elem + 0.0) < 2) {m << 0 << 1;}
+  // only consider first m elements of tempor
   arma::vec temp = tempor(m);
+  // create matrix where each row is temp for the coefficient prior variances
   arma::mat g = arma::zeros(n2, arma::as_scalar(temp.n_elem));
   g.each_row() += temp.t();
-  g.each_col() /= (b/(a-1));
+  // divide by mean of IG prior (variances) for simplicity of conjugate derivations
+  g.each_col() /= (b / (a - 1));
+  // return list of priors
   return List::create(a, b, g);
 }
 
@@ -51,7 +66,7 @@ List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
   arma::mat muhat_post = arma::zeros(n2, m);
   arma::cube G_post(m, m, n2, fill::zeros);
   // a and a_post are constant in our set-up
-  a_post.fill(a(0) + N/2.0);
+  a_post.fill(a(0) + N / 2.0);
   b_post(0) = b(0) + arma::as_scalar(datum.col(0).t() * datum.col(0)) / 2.0;
   // loop through all regressions
   for (int i = 1; i < n2; i++) {
@@ -70,7 +85,7 @@ List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
     // arma::vec muhat = solve(Ginv_chol, solve(Ginv_chol.t(), xi.t() * yi));
     arma::vec temp_mu, muhat;
     // see if solve(Ginv_chol.t(), xi.t() * yi) works
-    bool status = solve(temp_mu, Ginv_chol.t(),xi.t() * yi);
+    bool status = solve(temp_mu, Ginv_chol.t(), xi.t() * yi);
     // if solve fails, use generalized inverse to calculate G*X'*y
     if (! status){
       muhat = pinv(Ginv) * (xi.t() * yi);
@@ -79,12 +94,12 @@ List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
       bool status2 = solve(muhat, Ginv_chol, temp_mu);
       // if this solve fails, use generalized inverse to calculate G*X'*y
       if (!status2){
-        muhat = pinv(Ginv)*(xi.t() * yi);
+        muhat = pinv(Ginv) * (xi.t() * yi);
       }
     }
     // fill in posteriors for returning
     muhat_post.row(i).head(nn) = muhat.t();
-    G_post(span(0, nn-1), span(0, nn-1), span(i,i)) = Ginv_chol;
+    G_post(span(0, nn - 1), span(0, nn - 1), span(i, i)) = Ginv_chol;
     // calculate b_post(i)
     b_post(i) = b(i) + arma::as_scalar(yi.t() * yi - muhat.t() * Ginv * muhat) / 2.0;
   }
@@ -94,99 +109,80 @@ List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
 
 // [[Rcpp::export]]
 arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
-	int n2 = arma::as_scalar(NNarray.n_rows);
-	arma::vec ap = posts[0];
-	arma::vec bp = posts[1];
-	arma::mat mup = posts[2];
-	int m = mup.n_cols;
-	arma::sp_mat uhat(n2,n2);
-	uhat(0,0) = (1.0 / sqrt(bp(0))) * exp(lgamma((2.0*ap(0)+1.0)/2.0) - lgamma(ap(0)));
-	for (int i = 1; i < n2; i++) {
-		arma::vec gind = na_omitc(NNarray.row(i).head(m).t());
-		double tempd = 1.0 / sqrt(bp(i)) * exp(lgamma((2.0*ap(i)+1.0)/2.0) - lgamma(ap(i)));
-		uhat(i,i) = tempd;
-		// arma::vec x = mup.row(i).head(m);
-		// x *= tempd;
-		for (int j = 0; j < gind.n_rows + 0.0; j++){
-		  uhat(gind(j),i) = mup(i, j)*tempd;
-		}
-		// uhat.rows(conv_to<uvec>::from(gind)).col(i) = x;
-		//arma::umat locs(2,nn);
-		//locs.row(0) = conv_to<urowvec>::from(gind);
-		//locs.row(1).fill(i);
-		//uhat(m,n,x);
-	}
-	return uhat;
-}
-
-// [[Rcpp::export]]
-double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray, const double N){
+  // n2: number of locations
   int n2 = arma::as_scalar(NNarray.n_rows);
-  double ap = 6.0 + N/2.0;
-  List temp_priors = thetas_to_priors_c(thetas,n2);
-  arma::mat g = temp_priors[2];
-  arma::vec b = temp_priors[1];
-  double m = min(size(g)(1) + 0.0, size(NNarray)(1) + 0.0);
-  double ll = 6.0*log(b(0)) - ap*log(b(0) + arma::accu(pow(datum.col(0), 2))/2);
-  for (int i  = 1; i < n2; i++){
+  // get posteriors from list into vectors/matrices
+  arma::vec ap = posts[0];
+  arma::vec bp = posts[1];
+  arma::mat mup = posts[2];
+  // m: number of neighbors
+  int m = mup.n_cols;
+  // create sparse matrix
+  arma::sp_mat uhat(n2, n2);
+  // fill in first value with posterior mean of 1/sqrt(error)
+  uhat(0,0) = (1.0 / sqrt(bp(0))) * exp(lgamma((2.0 * ap(0) + 1.0) / 2.0) - lgamma(ap(0)));
+  for (int i = 1; i < n2; i++) {
+    // get neighbor indices
     arma::vec gind = na_omitc(NNarray.row(i).head(m).t());
-    arma::mat xi = -datum.cols(conv_to<uvec>::from(gind));
-    arma::vec yi = datum.col(i);
-    arma::mat Ginv = xi.t() * xi + diagmat(1 / g.row(i).head(gind.n_elem - 0.0));
-    arma::mat Ginv_chol = arma::chol(Ginv);
-    // arma::vec muhat = solve(Ginv_chol, solve(Ginv_chol.t(), xi.t() * yi));
-    // tryCATCH IF GINV_CHOL IS NOT INVERTIBLE!!!!
-    arma::vec temp_mu, muhat;
-    bool status = solve(temp_mu, Ginv_chol.t(),xi.t() * yi);
-    if (! status){
-      muhat = pinv(Ginv) * (xi.t() * yi);
-    } else {
-      bool status2 = solve(muhat, Ginv_chol, temp_mu);
-      if (!status2){
-        muhat = pinv(Ginv)*(xi.t() * yi);
-      }
+    // get 1/sqrt(error) posterior mean and put it on the diagonal
+    double tempd = 1.0 / sqrt(bp(i)) * exp(lgamma((2.0 * ap(i) + 1.0) / 2.0) - lgamma(ap(i)));
+    uhat(i,i) = tempd;
+    // scale the coefficients and fill them into the sparse matrix accordingly
+    for (int j = 0; j < gind.n_rows + 0.0; j++){
+      uhat(gind(j), i) = mup(i, j) * tempd;
     }
-    double b_post = b(i) + (accu(pow(yi,2)) - as_scalar(muhat.t() * Ginv * muhat))/2.0;
-    double ldet = 0.5 * (2.0 * accu(log(Ginv_chol.diag())) + accu(log(g.row(i).head(gind.n_elem - 0.0))));
-    double lb = 6.0 * log(b(i)) - ap * log(b_post);
-    ll +=  lb - ldet;
   }
-  ll *= -1;
-  return ll;
+  return uhat;
 }
 
-					
 // [[Rcpp::export]]
-double minus_loglikeli_c2(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray){
+double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray){
+  // get number of points n2 and number of repetitions per point N
   int n2 = arma::as_scalar(NNarray.n_rows);
   double N = arma::as_scalar(datum.n_rows);
-  double ap = 6.0 + N/2.0;
-  List temp_priors = thetas_to_priors_c(thetas,n2);
+  // IG posterior shape
+  double ap = 6.0 + N / 2.0;
+  // get priors from the function, turn it into matrices/vectors instead of List
+  List temp_priors = thetas_to_priors_c(thetas, n2);
   arma::mat g = temp_priors[2];
   arma::vec b = temp_priors[1];
+  // get m (number of neighbors), as either the maximum allowed during construction or from the prior
   double m = min(size(g)(1) + 0.0, size(NNarray)(1) + 0.0);
-  double ll = 6.0*log(b(0)) - ap*log(b(0) + arma::accu(pow(datum.col(0), 2))/2);
+  // create ll for the integrated likelihood and calculate the first element to sum
+  double ll = 6.0 * log(b(0)) - ap * log(b(0) + arma::accu(pow(datum.col(0), 2)) / 2);
   for (int i  = 1; i < n2; i++){
+    // get m nearest neighbors
     arma::vec gind = na_omitc(NNarray.row(i).head(m).t());
+    // get Xi for regression
     arma::mat xi = -datum.cols(conv_to<uvec>::from(gind));
+    // get yi for regression (response)
     arma::vec yi = datum.col(i);
+    // get inverse of posterior G (scaled coefficient variances)
     arma::mat Ginv = xi.t() * xi + diagmat(1 / g.row(i).head(gind.n_elem - 0.0));
     arma::mat Ginv_chol = arma::chol(Ginv);
+    // tryCATCH version of this double solve to get the posterior mean of the coefficients
     // arma::vec muhat = solve(Ginv_chol, solve(Ginv_chol.t(), xi.t() * yi));
-    // tryCATCH IF GINV_CHOL IS NOT INVERTIBLE!!!!
     arma::vec temp_mu, muhat;
-    bool status = solve(temp_mu, Ginv_chol.t(),xi.t() * yi);
+    // see if solve(Ginv_chol.t(), xi.t() * yi) works
+    bool status = solve(temp_mu, Ginv_chol.t(), xi.t() * yi);
+    // if solve fails, use generalized inverse to calculate G*X'*y
     if (! status){
       muhat = pinv(Ginv) * (xi.t() * yi);
     } else {
+      // see if solve(Ginv_chol, temp_mu) fails
       bool status2 = solve(muhat, Ginv_chol, temp_mu);
+      // if this solve fails, use generalized inverse to calculate G*X'*y
       if (!status2){
-        muhat = pinv(Ginv)*(xi.t() * yi);
+        muhat = pinv(Ginv) * (xi.t() * yi);
       }
     }
-    double b_post = b(i) + (accu(pow(yi,2)) - as_scalar(muhat.t() * Ginv * muhat))/2.0;
+    // get IG posterior scale as b + (y'y - muhat' Ginvv muhat)/2
+    double b_post = b(i) + (accu(pow(yi, 2)) - as_scalar(muhat.t() * Ginv * muhat)) / 2.0;
+    // negative of calculate (log) determinant term sqrt(|G| / |g|)
     double ldet = 0.5 * (2.0 * accu(log(Ginv_chol.diag())) + accu(log(g.row(i).head(gind.n_elem - 0.0))));
+    // calculate (log) last term b^a / b_post^a_post
     double lb = 6.0 * log(b(i)) - ap * log(b_post);
+    // sum with previous log-likelihood
     ll +=  lb - ldet;
   }
   ll *= -1;
