@@ -93,7 +93,7 @@ get_mle <- function(dat, NNarray) {
 #' 
 #' the first element is a vector of length n containing the posterior of the IG shape parameters,
 #' 
-#' the second element is a vector of length n2containing the posteriors of the IG scale parameters,
+#' the second element is a vector of length n containing the posteriors of the IG scale parameters,
 #' 
 #' the third element is an n * m matrix, where each row contains the posterior mean of the regression
 #' coefficients (and if there are less than m, NAs fill the rest of the row),
