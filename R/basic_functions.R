@@ -1,8 +1,8 @@
-thetas_to_priors <- function(thetas, n2) {
+thetas_to_priors <- function(thetas, n2, thresh = 1e-3) {
   b <- 5 * exp(thetas[[1]]) * (1 - exp(-exp(thetas[[2]])/sqrt(0:(n2 - 1))))
   a <- rep(6, n2)
-  tempor <- exp(-exp(thetas[[3]]) * (1:30))
-  m <- which(tempor < 0.001)[1] - 1
+  tempor <- exp(-exp(thetas[[3]]) * (1:500))
+  m <- which(tempor < thresh)[1] - 1
   if (is.na(m) | m < 2) {
     m <- 2
   }
