@@ -40,12 +40,6 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
   return(list(a, b, g))
 }
 
-create_data <- function(covar_true, N) {
-  
-  # Lazy creation of data
-  datum <- mvrnorm(N, rep(0, nrow(covar_true)), covar_true)
-  return(datum)
-}
 
 #' Creates the simplist frequentist version of our method
 #' 
