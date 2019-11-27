@@ -7,7 +7,7 @@
 minus_loglikeli(thetas, datum, NNarray)
 }
 \arguments{
-\item{thetas}{3 real numbers representing the log of the three hyperparameters}
+\item{thetas}{3 real numbers representing the three hyperparameters}
 
 \item{datum}{an N * n matrix of the data (N replications of n locations/variables)}
 
@@ -22,7 +22,7 @@ a numeric value (the negative log likelihood)
 }
 \description{
 Given the three hyperparameters, this calculates the negative of the integrated log-likelihood.
-See the mathematical_details pdf for further explanation as needed. It is advised 
+See the mathematical description for further explanation as needed. It is advised 
 to use the C++ version minus_loglikeli_c to improve speed considerably. This 
 function is often used with an optimizer or MCMC method to find the optimal 
 hyperparameters.

@@ -4,7 +4,7 @@
 #' hyperparameters described in the mathematical description. The coefficients are assumed to have zero
 #' mean apriori, so only three prior elements are returned (the variance shape/scale, and the coefficnet variances).
 #'
-#' @param thetas 3 real numbers representing the log of the three hyperparameters
+#' @param thetas 3 real numbers representing the three hyperparameters
 #' @param n the number of locations
 #' @param thresh the threshold for determining the number of neighbors based on the third
 #' hyperparameter, defaults to 1e-3 
@@ -172,7 +172,8 @@ get_posts <- function(datum, a, b, g, NNarray) {
 #' Creates posterior mean sparse matrix from posteriors
 #' 
 #' This function uses the posterior arguments to create a posterior mean estimate of the Cholesky of
-#' the precision matrix. This function creates the Bayesian version of get_mle or its variants.
+#' the precision matrix. This function creates the Bayesian version of get_mle or its variants. See
+#' the mathematical description for details of the methodology.
 #'
 #' @param posts a List of the posteriors from get_posts (or get_posts_c); alternatively it can be
 #' custom values as long as the sizes match the output from get_posts.
@@ -223,12 +224,12 @@ samp_posts <- function(posts, NNarray) {
 #' Calculates the integrated log likelihood
 #' 
 #' Given the three hyperparameters, this calculates the negative of the integrated log-likelihood.
-#' See the mathematical_details pdf for further explanation as needed. It is advised 
+#' See the mathematical description for further explanation as needed. It is advised 
 #' to use the C++ version minus_loglikeli_c to improve speed considerably. This 
 #' function is often used with an optimizer or MCMC method to find the optimal 
 #' hyperparameters.
 #'
-#' @param thetas 3 real numbers representing the log of the three hyperparameters
+#' @param thetas 3 real numbers representing the three hyperparameters
 #' @param datum an N * n matrix of the data (N replications of n locations/variables)
 #' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 

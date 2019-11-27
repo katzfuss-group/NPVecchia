@@ -22,7 +22,8 @@ such that \deqn{\Omega = U U'}
 }
 \description{
 This function uses the posterior arguments to create a posterior mean estimate of the Cholesky of
-the precision matrix. This function creates the Bayesian version of get_mle or its variants.
+the precision matrix. This function creates the Bayesian version of get_mle or its variants. See
+the mathematical description for details of the methodology.
 }
 \examples{
 

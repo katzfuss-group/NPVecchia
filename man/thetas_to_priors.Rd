@@ -7,7 +7,7 @@
 thetas_to_priors(thetas, n, thresh = 0.001)
 }
 \arguments{
-\item{thetas}{3 real numbers representing the log of the three hyperparameters}
+\item{thetas}{3 real numbers representing the three hyperparameters}
 
 \item{n}{the number of locations}
 
