@@ -9,7 +9,7 @@ get_mle(datum, NNarray)
 \arguments{
 \item{datum}{an N * n matrix, where each row corresponds to N replications for that location}
 
-\item{NNarray}{an n * m matrix giving the m nearest neighbors previous in the ordering (or 
+\item{NNarray}{an n * m integer matrix giving the m nearest neighbors previous in the ordering (or 
 outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 from closest to furthest away. Required: m < N, m >= 2}
 }
@@ -24,11 +24,11 @@ This will only work when N > m (or lm will have issues), so call the function ac
 \examples{
 
 #create fake data and fake neighbor matrix
-datum <- matrix(rnorm(1e4), nrow = 10)
-NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
+datum <- matrix(rnorm(2e4), nrow = 20)
+NNarray <- matrix(NA, nrow = 1e3, ncol = 5)
 #can only use previous points in ordering (this is actually 
 #impossible in low dimensional space like this is designed for)
-for(i in 1:100){
+for(i in 1:5){
   NNarray[i:1e3,i] <- i
 }
 #Return sparse Cholesky of the precision matrix

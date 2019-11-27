@@ -13,7 +13,7 @@ get_posts(datum, priors, NNarray)
 the scale of the IG prior, and the prior variances of the coefficients (i.e. the output from
 thetas_to_priors)}
 
-\item{NNarray}{an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
+\item{NNarray}{an n * m2 integer matrix giving the m nearest neighbors previous in the ordering (or 
 outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 from closest to furthest away. It is OK to have m2 > m, as it will be reduced to match the size
 of the matrix g, but never have m2 < 2.}

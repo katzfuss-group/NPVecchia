@@ -61,7 +61,7 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #' This will only work when N > m (or lm will have issues), so call the function accordingly.
 #'
 #' @param datum an N * n matrix, where each row corresponds to N replications for that location
-#' @param NNarray an n * m matrix giving the m nearest neighbors previous in the ordering (or 
+#' @param NNarray an n * m integer matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 #' from closest to furthest away. Required: m < N, m >= 2
 #'
@@ -77,11 +77,24 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
 #' for(i in 1:100){
-#'   NNarray[i:1e3,i] <- i
+#'   NNarray[i:1e3, i] <- i
 #' }
 #' #Return sparse Cholesky of the precision matrix
 #' uhat <- get_mle(datum, NNarray)
 get_mle <- function(datum, NNarray) {
+  if(!(is.matrix(datum) && is.matrix(NNarray))) {
+    stop("The data and NNarray must both be matrices")
+  }
+  if(ncol(datum) != nrow(NNarray)){
+    stop(paste("The number of locations (", ncol(datum), ") must equal the number of 
+               rows of the neighbor matrix but given (", nrow(NNarray), ")", sep=""))
+  }
+  if(ncol(NNarray) < 2) {
+    stop("At least 2 neighbors are required (2 or more columns in NNarray)")
+  }
+  if(! is.integer(NNarray)){
+    stop("NNarray must consist of only integers (and/or NAs)!")
+  }
   # get n
   n <- ncol(datum)
   # get first regression variance
@@ -111,7 +124,7 @@ get_mle <- function(datum, NNarray) {
 #' @param priors a list of length 3 containing the priors for the shape of the IG prior,
 #' the scale of the IG prior, and the prior variances of the coefficients (i.e. the output from
 #' thetas_to_priors)
-#' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
+#' @param NNarray an n * m2 integer matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 #' from closest to furthest away. It is OK to have m2 > m, as it will be reduced to match the size
 #' of the matrix g, but never have m2 < 2.
@@ -138,7 +151,7 @@ get_mle <- function(datum, NNarray) {
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
 #' for(i in 1:100){
-#'   NNarray[i:1e3,i] <- i
+#'   NNarray[i:1e3, i] <- i
 #' }
 #' priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 #' 
@@ -198,7 +211,7 @@ get_posts <- function(datum, priors, NNarray) {
 #'
 #' @param posts a List of the posteriors from get_posts (or get_posts_c); alternatively it can be
 #' custom values as long as the sizes match the output from get_posts.
-#' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
+#' @param NNarray an n * m2 integer matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 #' from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 #' of the posterior means (i.e. number of columns in the third element of the posteriors), but
@@ -216,7 +229,7 @@ get_posts <- function(datum, priors, NNarray) {
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
 #' for(i in 1:100){
-#'   NNarray[i:1e3,i] <- i
+#'   NNarray[i:1e3, i] <- i
 #' }
 #' priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 #' 
@@ -253,7 +266,7 @@ samp_posts <- function(posts, NNarray) {
 #' @param thetas 3 real numbers representing the three hyperparameters; as it is on the log scale,
 #' it should generally be between -6 and 4 to avoid numerical issues (overflow or underflow)
 #' @param datum an N * n matrix of the data (N replications of n locations/variables)
-#' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
+#' @param NNarray an n * m2 integer matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 #' from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 #' of the posterior means (i.e. number of columns in the third element of the posteriors), but
@@ -272,7 +285,7 @@ samp_posts <- function(posts, NNarray) {
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
 #' for(i in 1:100){
-#'   NNarray[i:1e3,i] <- i
+#'   NNarray[i:1e3, i] <- i
 #' }
 #' 
 #' #calculates log likelihood

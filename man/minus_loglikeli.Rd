@@ -12,7 +12,7 @@ it should generally be between -6 and 4 to avoid numerical issues (overflow or u
 
 \item{datum}{an N * n matrix of the data (N replications of n locations/variables)}
 
-\item{NNarray}{an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
+\item{NNarray}{an n * m2 integer matrix giving the m nearest neighbors previous in the ordering (or 
 outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 of the posterior means (i.e. number of columns in the third element of the posteriors), but
