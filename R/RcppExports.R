@@ -75,8 +75,10 @@ samp_posts_c <- function(posts, NNarray) {
 #'   from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 #'   of the posterior means (i.e. number of columns in the third element of the posteriors), but
 #'   never have m2 < 2.
-#' 
-minus_loglikeli_c <- function(thetas, datum, NNarray) {
-    .Call(`_NPVecchia_minus_loglikeli_c`, thetas, datum, NNarray)
+#' @param threshh threshold for number of neighbors (for thetas_to_priors); defaults
+#'   to 1e-3
+#'   
+minus_loglikeli_c <- function(thetas, datum, NNarray, threshh = 1e-3) {
+    .Call(`_NPVecchia_minus_loglikeli_c`, thetas, datum, NNarray, threshh)
 }
 

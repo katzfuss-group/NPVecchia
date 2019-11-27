@@ -195,16 +195,19 @@ arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
 //'   from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 //'   of the posterior means (i.e. number of columns in the third element of the posteriors), but
 //'   never have m2 < 2.
-//' 
+//' @param threshh threshold for number of neighbors (for thetas_to_priors); defaults
+//'   to 1e-3
+//'   
 // [[Rcpp::export]]
-double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray){
+double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray,
+                         const double threshh = 1e-3){
   // get number of points n2 and number of repetitions per point N
   int n2 = arma::as_scalar(NNarray.n_rows);
   double N = arma::as_scalar(datum.n_rows);
   // IG posterior shape
   double a_post = 6.0 + N / 2.0;
   // get priors from the function, turn it into matrices/vectors instead of List
-  List temp_priors = thetas_to_priors_c(thetas, n2);
+  List temp_priors = thetas_to_priors_c(thetas, n2, threshh);
   arma::mat g = temp_priors[2];
   arma::vec b = temp_priors[1];
   // get m (number of neighbors), as either the maximum allowed during construction or from the prior

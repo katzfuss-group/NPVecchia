@@ -250,6 +250,8 @@ samp_posts <- function(posts, NNarray) {
 #' from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 #' of the posterior means (i.e. number of columns in the third element of the posteriors), but
 #' never have m2 < 2.
+#' @param threshh threshold for number of neighbors (for thetas_to_priors); defaults
+#' to 1e-3
 #'
 #' @return a numeric value (the negative log likelihood)
 #' @export
@@ -269,14 +271,14 @@ samp_posts <- function(posts, NNarray) {
 #' minus_loglikeli(c(1, 1, 1), datum, NNarray)
 #' 
 #' 
-minus_loglikeli <- function(thetas, datum, NNarray) {
+minus_loglikeli <- function(thetas, datum, NNarray, threshh = 1e-3) {
   # get n, N
   n <- nrow(NNarray)
   N <- nrow(datum)
   # get alpha posterior
   a_post <- 6 + N/2
   # get priors
-  pr <- thetas_to_priors(thetas, n)
+  pr <- thetas_to_priors(thetas, n, thresh = threshh)
   # get m
   # make sure m is not greater than max number of neighbors set
   # (from NNarray creation)
