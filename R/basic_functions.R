@@ -56,7 +56,7 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #' @param dat an N * n matrix, where each row corresponds to N replications for that location
 #' @param NNarray an n * m matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
-#' for nearest to furthest. Required: m < N, m >= 2
+#' from closest to furthest away. Required: m < N, m >= 2
 #'
 #' @return Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 
 #' such that \deqn{\Omega = U U'}
@@ -95,7 +95,7 @@ get_mle <- function(dat, NNarray) {
 #' thetas_to_priors)
 #' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
-#' for nearest to furthest. It is OK to have m2 > m, as it will be reduced to match the size
+#' from closest to furthest away. It is OK to have m2 > m, as it will be reduced to match the size
 #' of the matrix g, but never have m2 < 2.
 #'
 #' @return List of posterior arguments, where
@@ -182,7 +182,7 @@ get_posts <- function(datum, priors, NNarray) {
 #' custom values as long as the sizes match the output from get_posts.
 #' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
-#' for nearest to furthest. It is OK to have m2 large, as it will be reduced to match the size
+#' from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 #' of the posterior means (i.e. number of columns in the third element of the posteriors), but
 #' never have m2 < 2.
 #'
@@ -236,7 +236,7 @@ samp_posts <- function(posts, NNarray) {
 #' @param datum an N * n matrix of the data (N replications of n locations/variables)
 #' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
-#' for nearest to furthest. It is OK to have m2 large, as it will be reduced to match the size
+#' from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 #' of the posterior means (i.e. number of columns in the third element of the posteriors), but
 #' never have m2 < 2.
 #'
