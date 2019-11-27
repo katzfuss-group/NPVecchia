@@ -64,8 +64,10 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #'
 #' @examples
 get_mle <- function(dat, NNarray) {
+  #get parameters
   n <- ncol(dat)
-  d <- 1/sqrt(sd(dat[, 1]))
+  d <- 1/sd(dat[, 1])
+  #create sparse matrix with first entry
   uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
   for (i in 2:n) {
     gind <- na.omit(NNarray[i, ])
