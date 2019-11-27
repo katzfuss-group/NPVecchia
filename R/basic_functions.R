@@ -214,11 +214,8 @@ minus_loglikeli <- function(thetas, datum, NNarray) {
   pr <- thetas_to_priors(thetas, n)
   # get m
   # make sure m is not greater than max number of neighbors set
-  # (from NNarray creation), and force it to be at least 2
+  # (from NNarray creation)
   m <- min(ncol(pr[[3]]), ncol(NNarray))
-  if (m < 2) {
-    m <- 2
-  }
   # get needed priors from the list of priors
   b <- pr[[2]]
   g <- pr[[3]]
@@ -232,21 +229,9 @@ minus_loglikeli <- function(thetas, datum, NNarray) {
     xi <- -datum[, gind]
     yi <- datum[, i]
     # Get inverse of G posterior
-    Ginv <- tryCatch({
-      crossprod(xi) + diag(g[i, 1:nn]^(-1), nrow = nn)
-    }, error = function(e) {
-      show(dim(crossprod(xi)))
-      show(m)
-      show(nn)
-      show(length(na.omit(NNarray[i, 1:m])))
-      show(i)
-      break
-    })
-    # Ginv <- crossprod(xi) + diag(g[i,1:nn]^(-1), nrow = nn)
+    Ginv <- crossprod(xi) + diag(g[i,1:nn]^(-1), nrow = nn)
     # Take the Cholesky of Ginv
     Ginv_chol <- chol(Ginv)
-    # G <- ginv(Ginv); muhat <- G %*% t(xi) %*% yi; muhat <- solve(Ginv_chol,
-    # solve(t(Ginv_chol), initt[[i]][[2]]))
     # Try to get muhat directly, but if Ginv_chol is not invertible, use 
     # the generalized inverse
     muhat <- tryCatch({
