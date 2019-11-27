@@ -75,7 +75,7 @@ get_mle <- function(dat, NNarray) {
 #' Given the priors calculated using thetas_to_priors, this function calculates the posterior 
 #' distributions of the regression errors and coefficients.
 #'
-#' @param x an N * n matrix of the data (N replications of n locations/variables)
+#' @param datum an N * n matrix of the data (N replications of n locations/variables)
 #' @param a vector of length n of IG scale priors (thetas_to_priors()[[1]])
 #' @param b vector of length n of IG shape priors (thetas_to_priors()[[2]])
 #' @param g matrix of dimension n * m of prior coefficient variances (thetas_to_priors()[[3]])
@@ -112,21 +112,21 @@ get_mle <- function(dat, NNarray) {
 #' 
 #' posteriors <- get_posts(data, priors[[1]], priors[[2]], priors[[3]], NNarray)
 #' 
-get_posts <- function(x, a, b, g, NNarray) {
-  n2 <- ncol(x)
-  N <- nrow(x)
+get_posts <- function(datum, a, b, g, NNarray) {
+  n2 <- ncol(datum)
+  N <- nrow(datum)
   m <- ncol(g)
   a_post <- rep(0, n2)
   b_post <- rep(0, n2)
   muhat_post <- matrix(NA, nrow = n2, ncol = m)
   G_post <- array(NA, dim = c(m, m, n2))
   a_post <- a + N/2
-  b_post[1] <- b[1] + t(x[, 1] %*% x[, 1])/2
+  b_post[1] <- b[1] + t(datum[, 1] %*% datum[, 1])/2
   for (i in 2:n2) {
     gind <- na.omit(NNarray[i, 1:m])
     nn <- length(gind)
-    xi <- -x[, gind]
-    yi <- x[, i]
+    xi <- -datum[, gind]
+    yi <- datum[, i]
     Ginv <- t(xi) %*% xi + diag(g[i, 1:nn]^(-1), nrow = nn)
     Ginv_chol <- chol(Ginv)
     # G <- ginv(Ginv) muhat <- G%*%t(xi)%*%yi

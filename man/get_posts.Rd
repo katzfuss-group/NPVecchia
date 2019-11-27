@@ -4,10 +4,10 @@
 \alias{get_posts}
 \title{Gets posteriors of Bayesian methodology}
 \usage{
-get_posts(x, a, b, g, NNarray)
+get_posts(datum, a, b, g, NNarray)
 }
 \arguments{
-\item{x}{an N * n matrix of the data (N replications of n locations/variables)}
+\item{datum}{an N * n matrix of the data (N replications of n locations/variables)}
 
 \item{a}{vector of length n of IG scale priors (thetas_to_priors()[[1]])}
 
