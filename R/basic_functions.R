@@ -204,14 +204,14 @@ samp_posts <- function(posts, NNarray) {
   return(uhat)
 }
 
-minus_loglikeli <- function(x, datum, NNarray) {
+minus_loglikeli <- function(thetas, datum, NNarray) {
   # get n, N
   n <- nrow(NNarray)
   N <- nrow(datum)
   # get alpha posterior
-  ap <- 6 + N/2
+  a_post <- 6 + N/2
   # get priors
-  pr <- thetas_to_priors(x, n)
+  pr <- thetas_to_priors(thetas, n)
   # get m
   # make sure m is not greater than max number of neighbors set
   # (from NNarray creation), and force it to be at least 2
@@ -223,7 +223,7 @@ minus_loglikeli <- function(x, datum, NNarray) {
   b <- pr[[2]]
   g <- pr[[3]]
   # get the first element for the log-likelihood
-  sums <- 6 * log(b[1]) - ap * log(b[1] + crossprod(datum[, 1])/2)
+  sums <- 6 * log(b[1]) - a_post * log(b[1] + crossprod(datum[, 1])/2)
   for (i in 2:n) {
     # get nearest neighbors and how many there are as nn
     gind <- na.omit(NNarray[i, 1:m])
@@ -259,7 +259,7 @@ minus_loglikeli <- function(x, datum, NNarray) {
     # calculate the determinant term of the integrated likelihood
     ldet <- -0.5 * (2 * sum(log(na.omit(diag(Ginv_chol)))) + (sum(log(g[i, 1:nn]))))
     # calculate the term based on the ratio of IG parameters
-    lb <- 6 * log(b[i]) - ap * log(b_post)
+    lb <- 6 * log(b[i]) - a_post * log(b_post)
     # Add these values to the log integrated likelihood
     sums <- sums + ldet + lb
   }
