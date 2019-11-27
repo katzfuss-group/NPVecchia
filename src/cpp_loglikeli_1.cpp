@@ -70,8 +70,10 @@ List thetas_to_priors_c(const arma::vec& thetas, const int n, const double thres
 //' This is the C++ version of \code{\link{get_posts}}. See there for further documentation.
 //' 
 // [[Rcpp::export]]
-List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
-                  const arma::mat& g, const arma::mat& NNarray) {
+List get_posts_c(const arma::mat& datum, List priors, const arma::mat& NNarray) {
+  // get b,g priors from list input
+  arma::vec b = priors[1];
+  arma::mat g = priors[2];
   // n2, N, m as usual: number of locations, number of replications and number of neighbors
   int n2 = arma::as_scalar(NNarray.n_rows);
   int N = arma::as_scalar(datum.n_rows);
@@ -84,7 +86,8 @@ List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
   arma::mat muhat_post = arma::zeros(n2, m);
   arma::cube G_post(m, m, n2, fill::zeros);
   // a and a_post are constant in our set-up
-  a_post.fill(a(0) + N / 2.0);
+  // a_post.fill(a(0) + N / 2.0);
+  a_post = priors[0] + N / 2.0;
   b_post(0) = b(0) + arma::as_scalar(datum.col(0).t() * datum.col(0)) / 2.0;
   // loop through all regressions
   for (int i = 1; i < n2; i++) {
