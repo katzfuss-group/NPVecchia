@@ -60,7 +60,7 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #' For each regression, the MLE is used (i.e. the coefficients and residual standard error obtained from lm). 
 #' This will only work when N > m (or lm will have issues), so call the function accordingly.
 #'
-#' @param dat an N * n matrix, where each row corresponds to N replications for that location
+#' @param datum an N * n matrix, where each row corresponds to N replications for that location
 #' @param NNarray an n * m matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 #' from closest to furthest away. Required: m < N, m >= 2
@@ -81,18 +81,18 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #' }
 #' #Return sparse Cholesky of the precision matrix
 #' uhat <- get_mle(datum, NNarray)
-get_mle <- function(dat, NNarray) {
+get_mle <- function(datum, NNarray) {
   # get n
-  n <- ncol(dat)
+  n <- ncol(datum)
   # get first regression variance
-  d <- 1/sd(dat[, 1])
+  d <- 1/sd(datum[, 1])
   # create sparse matrix with first entry d
   uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
   for (i in 2:n) {
     # get indices of nearest neighbors (to regress column i on)
     gind <- na.omit(NNarray[i, ])
     # regress i on neighbors
-    temp <- lm(dat[, i] ~ -1 + dat[, gind])
+    temp <- lm(datum[, i] ~ -1 + datum[, gind])
     # set the diagonal element to the regression SE
     d <- 1/(summary.lm(temp)$sigma)
     uhat[i, i] <- d

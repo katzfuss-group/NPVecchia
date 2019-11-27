@@ -4,10 +4,10 @@
 \alias{get_mle}
 \title{Creates the simplist frequentist version of our method}
 \usage{
-get_mle(dat, NNarray)
+get_mle(datum, NNarray)
 }
 \arguments{
-\item{dat}{an N * n matrix, where each row corresponds to N replications for that location}
+\item{datum}{an N * n matrix, where each row corresponds to N replications for that location}
 
 \item{NNarray}{an n * m matrix giving the m nearest neighbors previous in the ordering (or 
 outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
