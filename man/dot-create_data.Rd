@@ -7,9 +7,9 @@
 .create_data(covar_true, N)
 }
 \arguments{
-\item{N}{number of replications}
+\item{covar_true}{covariance matrix (must be symmetric and positive definite)}
 
-\item{covar_truecovariance}{matrix (must be symmetric and positive definite)}
+\item{N}{number of replications}
 }
 \value{
 an N * n matrix with each row corresponding to a replication of all covariates/locations
