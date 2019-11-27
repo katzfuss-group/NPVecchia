@@ -32,6 +32,9 @@ get_posts_c <- function(datum, a, b, g, NNarray) {
     .Call(`_NPVecchia_get_posts_c`, datum, a, b, g, NNarray)
 }
 
+#' Creates posterior mean sparse matrix from posteriors
+#' 
+#' This is the C++ version of \code{\link{samp_posts}}. See there for further documentation.
 samp_posts_c <- function(posts, NNarray) {
     .Call(`_NPVecchia_samp_posts_c`, posts, NNarray)
 }

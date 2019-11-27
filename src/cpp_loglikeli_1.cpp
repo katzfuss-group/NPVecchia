@@ -125,6 +125,9 @@ List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
   return List::create(a_post, b_post, muhat_post, G_post);
 }
 
+//' Creates posterior mean sparse matrix from posteriors
+//' 
+//' This is the C++ version of \code{\link{samp_posts}}. See there for further documentation.
 // [[Rcpp::export]]
 arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
   // n2: number of locations
