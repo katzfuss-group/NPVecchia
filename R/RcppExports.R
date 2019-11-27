@@ -49,19 +49,3 @@ minus_loglikeli_c <- function(thetas, datum, NNarray) {
     .Call(`_NPVecchia_minus_loglikeli_c`, thetas, datum, NNarray)
 }
 
-rcpparma_hello_world <- function() {
-    .Call(`_NPVecchia_rcpparma_hello_world`)
-}
-
-rcpparma_outerproduct <- function(x) {
-    .Call(`_NPVecchia_rcpparma_outerproduct`, x)
-}
-
-rcpparma_innerproduct <- function(x) {
-    .Call(`_NPVecchia_rcpparma_innerproduct`, x)
-}
-
-rcpparma_bothproducts <- function(x) {
-    .Call(`_NPVecchia_rcpparma_bothproducts`, x)
-}
-
