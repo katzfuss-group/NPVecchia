@@ -1,0 +1,238 @@
+---
+title: "Mathematical Formulation"
+output: pdf_document
+header-includes:
+  \usepackage{mathtools}
+  \usepackage{natbib}
+  \usepackage{xcolor,graphicx,bm,bbm,colonequals,amsmath,amssymb,url}
+  \usepackage{array,tabularx,multirow}
+  \usepackage{enumitem,algpseudocode}
+  \usepackage{amsthm}
+  \usepackage{color}
+  \usepackage[normalem]{ulem}
+  \usepackage{stackrel}
+bibliography: refs.bib
+vignette: >
+  %\VignetteIndexEntry{Mathematical Formulation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+\newcommand{\normal}{\mathcal{N}}
+\newcommand{\ba}{\mathbf{a}}
+\newcommand{\bh}{\mathbf{h}}
+\newcommand{\bv}{\mathbf{v}}
+\newcommand{\bc}{\mathbf{c}}
+\newcommand{\bb}{\mathbf{b}}
+\newcommand{\bg}{\mathbf{g}}
+\newcommand{\bs}{\mathbf{s}}
+\newcommand{\bp}{\mathbf{p}}
+\newcommand{\bx}{\mathbf{x}}
+\newcommand{\by}{\mathbf{y}}
+\newcommand{\bq}{\mathbf{q}}
+\newcommand{\bw}{\mathbf{w}}
+\newcommand{\bu}{\mathbf{u}}
+\newcommand{\bS}{\mathbf{S}}
+\newcommand{\bz}{\mathbf{z}}
+\newcommand{\bZ}{\mathbf{Z}}
+\newcommand{\bF}{\mathbf{F}}
+\newcommand{\bO}{\mathbf{O}}
+\newcommand{\bP}{\mathbf{P}}
+\newcommand{\bA}{\mathbf{A}}
+\newcommand{\bY}{\mathbf{Y}}
+\newcommand{\bJ}{\mathbf{J}}
+\newcommand{\bW}{\mathbf{W}}
+\newcommand{\bG}{\mathbf{G}}
+\newcommand{\bL}{\mathbf{L}}
+\newcommand{\bI}{\mathbf{I}}
+\newcommand{\bD}{\mathbf{D}}
+\newcommand{\bH}{\mathbf{H}}
+\newcommand{\bU}{\mathbf{U}}
+\newcommand{\bV}{\mathbf{V}}
+\newcommand{\bK}{\mathbf{K}}
+\newcommand{\bX}{\mathbf{X}}
+\newcommand{\bQ}{\mathbf{Q}}
+\newcommand{\bB}{\mathbf{B}}
+\newcommand{\bC}{\mathbf{C}}
+\newcommand{\bM}{\mathbf{M}}
+\newcommand{\bR}{\mathbf{R}}
+\newcommand{\bt}{\mathbf{t}}
+
+\newcommand{\all}{\bullet}
+
+
+\newcommand{\bfzero}{\mathbf{0}}
+\newcommand{\bfone}{\mathbf{1}}
+\newcommand{\bfalpha}{\bm{\alpha}}
+\newcommand{\bfgamma}{\bm{\gamma}}
+\newcommand{\bfmu}{\bm{\mu}}
+\newcommand{\bfxi}{\bm{\xi}}
+\newcommand{\bftheta}{\bm{\theta}}
+\newcommand{\bfeta}{\bm{\eta}}
+\newcommand{\bfnu}{\bm{\nu}}
+\newcommand{\bfdelta}{\bm{\delta}}
+\newcommand{\bfkappa}{\bm{\kappa}}
+\newcommand{\bfbeta}{\bm{\beta}}
+\newcommand{\bfepsilon}{\bm{\epsilon}}
+\newcommand{\bftau}{\bm{\tau}}
+\newcommand{\bfomega}{\bm{\omega}}
+\newcommand{\bfpi}{\bm{\pi}}
+\newcommand{\bfpsi}{\bm{\psi}}
+\newcommand{\bfSigma}{\bm{\Sigma}}
+\newcommand{\bfGamma}{\bm{\Gamma}}
+\newcommand{\bfLambda}{\bm{\Lambda}}
+\newcommand{\bfPsi}{\bm{\Psi}}
+\newcommand{\bfOmega}{\bm{\Omega}}
+
+
+\section{Notation}
+
+All of these will be introduced in the text, but for a quick reference they are listed here. 
+
+$n$: the number of (spatial) locations with observations
+
+$N$ : the number of observations per location
+
+$m$ : the number of neighbors for calculation
+
+$\alpha_i$ : the shape parameter for the IG prior in the i'th regression
+
+$\beta_i$ : the scale parameter for the IG prior in the i'th regression
+
+$a_i, b_i$ : posterior IG parameters
+
+$\bfGamma_i$ : the prior variance on the coefficients in the i'th regression
+
+$\bG_i$ : posterior variance
+
+$\hat{\bU} = \bU \bD^{-1/2}$ : Cholesky of the precision matrix
+
+
+\section{A spatial model and the screening effect}
+
+Assume we have $N \geq 1$ observations of a continuous spatial process at $n$ locations (in low dimensional space). We model the detrended (i.e., centered) data as 
+\begin{equation}
+\label{eq:datamodel}
+\bz^{(\ell)} | \bfSigma \overset{iid}{\sim} \normal_n(\bfzero,\bfSigma), \qquad \ell = 1,\ldots,N,
+\end{equation}
+where $\bz^{(\ell)} = (z_1^{(\ell)},\ldots,z_n^{(\ell)})'$, and $z_i^{(\ell)}$ is observed at spatial location $\bs_i$. We denote by $\bz$ all observations $\bz^{(1)},\ldots,\bz^{(N)}$ stacked into a long vector. We assume that the locations $\bs_1,\ldots,\bs_n$, and hence the corresponding variables $z_i^{(\ell)}$ in $\bz^{(\ell)}$, are ordered according to a maximin ordering \citep{Guinness2016a,Schafer2017}.
+
+Our goal is to make inference on the spatial covariance matrix $\bfSigma$ based on the data $\bz$, in the case where $n$ is large (in the hundreds or even hundreds of thousands) and $N$ is relatively small. Typically, a parametric, and often isotropic, covariance function is assumed to determine $\bfSigma$ such that it only is a function of a very small number of parameters, which can then be estimated relatively easily. Here, we avoid explicit assumptions of stationarity and isotropy. 
+
+Instead, we assume that a spatial screening effect holds, such that 
+\begin{equation}
+\label{eq:screening}
+p(z_i^{(\ell)}|\bz_{1:i-1}^{(\ell)},\bfSigma) = p(z_i^{(\ell)}|\bz_{g_m(i)}^{(\ell)},\bfSigma),
+\end{equation}
+where $g_m(i) \subset (1,\ldots,i-1)$ is an index vector consisting of the indices of the $\min(m,i-1)$ nearest neighbors to $\bs_i$ among those ordered previously; that is, $\bs_{(g_m(i))_j}$ is the $j$th nearest neighbor of $\bs_i$. The equation \eqref{eq:screening} always holds trivially holds for $m = n-1$, but for many covariances, it even holds (at least approximately) for $m \ll n$ due to the so-called screening effect. Assume for now that $m$ is fixed and known.
+
+Consider the modified Cholesky decomposition of the inverse of $\bfSigma$ (i.e., the precision matrix):
+
+\begin{equation}
+\label{eq:cholesky}
+\bfSigma^{-1} = \bU \bD^{-1}\bU',
+\end{equation}
+
+where $\bD = \text{diag}(d_1,\ldots,d_n)$ is a diagonal matrix with positive entries $d_i > 0$, and $\bU$ is an upper triangular matrix with unit diagonal (i.e., $\bU_{ii}=1$). The screening effect in \eqref{eq:screening} implies that $\bU$ is sparse, with at most $m$ nonzero off-diagonal elements per column \citep[e.g.,][Prop.~3.1]{Katzfuss2017a}. We define $\bu_i = \bU_{g_i,i}$ as the nonzero off-diagonal entries in the $i$th column. 
+
+\section{Inference conditional on hyperparameters}
+
+From \eqref{eq:cholesky}, we see that we can estimate $\bfSigma$ by inferring $d_1,\ldots,d_n$ and $\bu_1,\ldots,\bu_n$. To do so, note that our data model \eqref{eq:datamodel} can be written as a series of linear regression models \citep{huang2006covariance}:
+\begin{equation}
+\label{eq:regression}
+p(\bz | \bfSigma) = \prod_{i=1}^n p(\by_i|\by_{1:i-1} , \bfSigma) = \prod_{i=1}^n \normal_N(\by_i|\bX_i\bu_i,d_i\bI_N),
+\end{equation}
+where $\by_i = (z_i^{(1)},\ldots,z_i^{(N)})'$, and $\bX_i$ is an $N \times m$ matrix with $\ell$th row $-\bz_{g_i}^{(\ell)}{}'$. Note the negative sign for the entries of $\bX_i$. Further details on why this and \eqref{eq:cholesky} are pushed to Section 2.
+
+
+For the regression models in \eqref{eq:regression}, we assume the standard, conjugate priors to form a series of Bayesian regression models:
+\[
+ \bu_i | d_i,\bftheta \stackrel{ind.}{\sim} \normal(\bfzero,d_i\bfGamma_i), \qquad d_i | \bftheta \stackrel{ind.}{\sim} \mathcal{IG}(\alpha_i,\beta_i),
+\]
+where $\bftheta$ is a vector of hyperparameters determining $m$, $\bfGamma_i$, $\alpha_i$, and $\beta_i$, which will be discussed further below.
+
+Due to conjugacy, the posterior distribution (conditional on $\bftheta$) is available in closed form:
+\begin{align}
+p(\bu_1,\ldots,\bu_n,d_1,\ldots,d_n|\bz,\bftheta) & = \prod_{i=1}^n p(\bu_i,d_i|\bz,\bftheta) = \prod_{i=1}^n p(\bu_i|d_i,\bz,\bftheta) \, p(d_i|\bz,\bftheta)\\
+& = \prod_{i=1}^n \normal(\bu_i|\hat\bu_i,d_i\bG_i) \, \mathcal{IG}(d_i|a_i,b_i), \label{eq:udpost}
+\end{align}
+where $\hat\bu_i = \bG_i \bX_i'\by_i$, $\bG_i = (\bX_i'\bX_i + \bfGamma_i^{-1})^{-1}$, $a_i = \alpha_i + N/2$, and $b_i = \beta_i + (\by_i'(\bI_N+\bX_i \bfGamma_i \bX_i')^{-1}\by_i)/2 = \beta_i + (\by_i'\by_i - \hat\bu_i' \bG_i^{-1} \hat\bu_i')/2$.
+
+
+<!-- Covariances and other posterior summaries of interest -->
+<!-- Using \eqref{eq:udpost}, we can easily obtain samples or posterior summaries of the entries of $\bU$ and $\bD$ conditional on $\bftheta$. However, in many applications, primary interest will be in computing posterior summaries of $\bfSigma$ and other quantities. If $n$ is not too large ($n < 10^4$, say), we can simply compute $\bfSigma^{-1}$ and hence $\bfSigma$ from $\bU$ and $\bD$. For large $n$, it is usually not possible to even hold the entire dense matrix $\bfSigma$ in memory, but we can quickly compute useful summaries of it based on $\bU$ and $\bD$.  -->
+
+<!-- In many applications, including climate-model emulation, it is of interest to sample new spatial fields from the model. We can sample $\bz^\star \sim \normal(\bfzero,\bfSigma)$ by sampling $\bw \sim \normal(\bfzero,\bI_n)$, and then setting $\bz^\star = (\bU \bD^{-1/2})^{-1} \bw $. If $\bU$ and $\bD$ are sampled from their posterior distribution given $\bz$, then we have obtained a sample from the posterior predictive distribution $p(\bz^\star|\bz)$. -->
+
+
+
+\section{Inference on the hyperparameters}
+
+Previously, we have assumed the hyperparameters $\bftheta$ determining $m$, $\bfGamma_i$, $\alpha_i$, and $\beta_i$ to be fixed. We now discuss the inference of these hyperparameters.
+
+First, assuming a hyperprior $p(\bftheta)$ has been specified, the goal is to obtain the posterior distribution $p(\bftheta|\bz) \propto p(\bz|\bftheta)p(\bftheta)$. While this distribution cannot be obtained analytically, we can sample from the posterior using the Metropolis-Hastings algorithm using the closed form of the marginal or integrated likelihood,
+\[
+p(\bz|\bftheta) \propto \prod_{i=1}^n \sqrt{|\bG_i|/|\bfGamma_i|} \times \beta_i^{\alpha_i}/b_i^{a_i} \times \Gamma(a_i)/\Gamma(\alpha_i),
+\]
+where the (non-bold) $\Gamma$ denotes the gamma function. Given the posterior distributions of $\bU,\bD$, these evaluations are cheap computationally. Another alternative is to optimize these hyperparameters with this likelihood.
+ 
+We now parameterize the prior distributions from before in terms of $\bftheta = (\theta_1,\theta_2,\theta_3)'$, such that the resulting model shrinks toward an isotropic Mat\'ern-type covariance. The parameter $\theta_1$ will play the role of a marginal variance, while $\theta_2$ and $\theta_3$ are related to the range and smoothness. For the package, we concatenate the prior parameters $\alpha_i, \beta_i$ into n-dimensional vectors $a, b$, and the prior variance parameter $\bfGamma_i$ (which is diagonal) into a matrix $\bG$ of dimension n by m as follows:
+
+$$
+\begin{aligned}
+a &= 6 \\
+b &= 5 e^{\theta_1} \bigg[ 1 - \text{exp} \bigg(- \frac{e^{\theta_2}}{\sqrt{0:(n-1)}} \bigg)  \bigg] \\
+\text{temp} &= \text{exp}\big(-e^{\theta_3} * (1:m) \big) \\
+\text{each row of } \bG &= \frac{\text{temp}}{b_i / (a_i - 1)} \\
+\end{aligned}
+$$
+
+For the method, we also provide a guideline for choosing $m$. Our solution is to tie $m$ to the decay of the elements of $\bU$. To allow the data to choose $m$ within the MCMC algorithm or optimization, we deterministically link the number of neighbors to $\theta_3$ (for our experiments we use $\text{exp}(\theta_3*j) < 0.001$, where $j$ denotes the neighbor number). This coincides to the amount of variation expected to be learnable from the data. By allowing $m$ to change within the MCMC, an incorrect $m$ will negatively influence the integrated likelihood so the data can reject it.
+
+
+
+\section{Why \eqref{eq:cholesky} and \eqref{eq:regression} hold}
+
+This section is based on Section 2.2.4 of \citep{pourahmadi2011covariance}. 
+
+First consider an autoregressive model, then move all elements to the same side. 
+
+$$
+\begin{aligned}
+\by_i &= \sum_{j \in g_i} \phi_{ij} z_j + \epsilon_i \\
+\by_i - \sum_{j \in g_i} \phi_{ij} z_j &= \epsilon_i
+\end{aligned}
+$$
+
+Now, it can be written in matrix form as $\epsilon = T \bX$, where
+
+$$
+T = \begin{pmatrix}
+1 \\
+-\phi_{21} & 1 \\
+-\phi_{31} & -\phi_{32} & 1 \\
+\dots & & & \dots \\
+-\phi_{n1} & -\phi_{n2} & \cdots & -\phi_{n n-1} & 1
+\end{pmatrix}
+$$
+
+However, for notational simplicity, we absolve the negative sign into the coefficient matrix $\bX$ Now, to see that it is indeed the valid covariance function:
+
+$$
+\begin{aligned}
+cov(\epsilon) = D^2 &= cov(TY) = T \Sigma T' \\
+\Sigma &= T^{-1} D^2 T'^{-1} \\
+\Sigma^{-1} &= T' D^{-2} T
+\end{aligned}
+$$
+
+\footnotesize
+\bibliographystyle{apalike}
+\bibliography{refs}
