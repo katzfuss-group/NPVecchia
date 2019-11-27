@@ -56,7 +56,7 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #' @param dat an N * n matrix, where each row corresponds to N replications for that location
 #' @param NNarray an n * m matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
-#' for nearest to furthest. Required: m < N
+#' for nearest to furthest. Required: m < N, m >= 2
 #'
 #' @return Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 
 #' such that \deqn{\Omega = U U'}
@@ -96,7 +96,7 @@ get_mle <- function(dat, NNarray) {
 #' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 #' for nearest to furthest. It is OK to have m2 > m, as it will be reduced to match the size
-#' of the matrix g.
+#' of the matrix g, but never have m2 < 2.
 #'
 #' @return List of posterior arguments, where
 #' 
@@ -179,7 +179,8 @@ get_posts <- function(datum, a, b, g, NNarray) {
 #' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 #' for nearest to furthest. It is OK to have m2 large, as it will be reduced to match the size
-#' of the posterior means (i.e. number of columns in the third element of the posteriors).
+#' of the posterior means (i.e. number of columns in the third element of the posteriors), but
+#' never have m2 < 2.
 #'
 #' @return Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 
 #' such that \deqn{\Omega = U U'}
@@ -204,6 +205,29 @@ samp_posts <- function(posts, NNarray) {
   return(uhat)
 }
 
+#' Calculates the integrated log likelihood
+#' 
+#' Given the three hyperparameters, this calculates the negative of the integrated log-likelihood.
+#' See the mathematical_details pdf for further explanation as needed. It is advised 
+#' to use the C++ version minus_loglikeli_c to improve speed considerably. This 
+#' function is often used with an optimizer or MCMC method to find the optimal 
+#' hyperparameters.
+#'
+#' @param thetas 3 real numbers representing the log of the three hyperparameters
+#' @param datum an N * n matrix of the data (N replications of n locations/variables)
+#' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
+#' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
+#' for nearest to furthest. It is OK to have m2 large, as it will be reduced to match the size
+#' of the posterior means (i.e. number of columns in the third element of the posteriors), but
+#' never have m2 < 2.
+#'
+#' @return a numeric value (the negative log likelihood)
+#' @export
+#'
+#' @examples
+#' 
+#' 
+#' 
 minus_loglikeli <- function(thetas, datum, NNarray) {
   # get n, N
   n <- nrow(NNarray)
