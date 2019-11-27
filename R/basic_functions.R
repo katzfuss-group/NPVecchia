@@ -90,9 +90,9 @@ get_mle <- function(dat, NNarray) {
 #' distributions of the regression errors and coefficients.
 #'
 #' @param datum an N * n matrix of the data (N replications of n locations/variables)
-#' @param a vector of length n of IG scale priors (thetas_to_priors()[[1]])
-#' @param b vector of length n of IG shape priors (thetas_to_priors()[[2]])
-#' @param g matrix of dimension n * m of prior coefficient variances (thetas_to_priors()[[3]])
+#' @param priors a list of length 3 containing the priors for the shape of the IG prior,
+#' the scale of the IG prior, and the prior variances of the coefficients (i.e. the output from
+#' thetas_to_priors)
 #' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 #' for nearest to furthest. It is OK to have m2 > m, as it will be reduced to match the size
@@ -124,9 +124,12 @@ get_mle <- function(dat, NNarray) {
 #' }
 #' priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 #' 
-#' posteriors <- get_posts(data, priors[[1]], priors[[2]], priors[[3]], NNarray)
+#' posteriors <- get_posts(data, priors, NNarray)
 #' 
-get_posts <- function(datum, a, b, g, NNarray) {
+get_posts <- function(datum, priors, NNarray) {
+  #get b, g priors from the list
+  b <- priors[[2]]
+  g <- priors[[3]]
   # get n, N, m
   n <- ncol(datum)
   N <- nrow(datum)
@@ -137,7 +140,7 @@ get_posts <- function(datum, a, b, g, NNarray) {
   muhat_post <- matrix(NA, nrow = n, ncol = m)
   G_post <- array(NA, dim = c(m, m, n))
   # Get posterior of a
-  a_post <- a + N/2
+  a_post <- priors[[1]] + N/2
   # Get first element of posterior of b
   b_post[1] <- b[1] + t(datum[, 1] %*% datum[, 1])/2
   for (i in 2:n) {
@@ -199,7 +202,7 @@ get_posts <- function(datum, a, b, g, NNarray) {
 #' }
 #' priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 #' 
-#' posteriors <- get_posts(data, priors[[1]], priors[[2]], priors[[3]], NNarray)
+#' posteriors <- get_posts(data, priors, NNarray)
 #' 
 #' uhat <- samp_posts(posteriors, NNarray)
 #' 

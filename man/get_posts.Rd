@@ -4,16 +4,14 @@
 \alias{get_posts}
 \title{Gets posteriors of Bayesian methodology}
 \usage{
-get_posts(datum, a, b, g, NNarray)
+get_posts(datum, priors, NNarray)
 }
 \arguments{
 \item{datum}{an N * n matrix of the data (N replications of n locations/variables)}
 
-\item{a}{vector of length n of IG scale priors (thetas_to_priors()[[1]])}
-
-\item{b}{vector of length n of IG shape priors (thetas_to_priors()[[2]])}
-
-\item{g}{matrix of dimension n * m of prior coefficient variances (thetas_to_priors()[[3]])}
+\item{priors}{a list of length 3 containing the priors for the shape of the IG prior,
+the scale of the IG prior, and the prior variances of the coefficients (i.e. the output from
+thetas_to_priors)}
 
 \item{NNarray}{an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
@@ -49,6 +47,6 @@ for(i in 1:100){
 }
 priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 
-posteriors <- get_posts(data, priors[[1]], priors[[2]], priors[[3]], NNarray)
+posteriors <- get_posts(data, priors, NNarray)
 
 }

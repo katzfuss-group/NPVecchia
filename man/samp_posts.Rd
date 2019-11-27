@@ -37,7 +37,7 @@ for(i in 1:100){
 }
 priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 
-posteriors <- get_posts(data, priors[[1]], priors[[2]], priors[[3]], NNarray)
+posteriors <- get_posts(data, priors, NNarray)
 
 uhat <- samp_posts(posteriors, NNarray)
 
