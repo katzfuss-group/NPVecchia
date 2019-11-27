@@ -39,6 +39,12 @@ samp_posts_c <- function(posts, NNarray) {
     .Call(`_NPVecchia_samp_posts_c`, posts, NNarray)
 }
 
+#' Calculates the integrated log likelihood
+#' 
+#' This is the C++ version of \code{\link{minus_loglikeli}}. See there for further documentation.
+#' 
+#' This function is much faster than the R version, making it preferable.
+#' 
 minus_loglikeli_c <- function(thetas, datum, NNarray) {
     .Call(`_NPVecchia_minus_loglikeli_c`, thetas, datum, NNarray)
 }

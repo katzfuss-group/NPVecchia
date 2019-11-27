@@ -156,6 +156,12 @@ arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
   return uhat;
 }
 
+//' Calculates the integrated log likelihood
+//' 
+//' This is the C++ version of \code{\link{minus_loglikeli}}. See there for further documentation.
+//' 
+//' This function is much faster than the R version, making it preferable.
+//' 
 // [[Rcpp::export]]
 double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray){
   // get number of points n2 and number of repetitions per point N
