@@ -65,6 +65,10 @@ List thetas_to_priors_c(const arma::vec& thetas, const int n, const double thres
   return List::create(a, b, g);
 }
 
+//' Gets posteriors of Bayesian methodology
+//' 
+//' This is the C++ version of \code{\link{get_posts}}. See there for further documentation.
+//' 
 // [[Rcpp::export]]
 List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b,
                   const arma::mat& g, const arma::mat& NNarray) {
