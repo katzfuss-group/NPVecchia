@@ -11,11 +11,11 @@
 #'
 #' @return List of priors, where 
 #' 
-#' the first element is a vector of length n2 containing the shape parameters of the IG prior on the variances, 
+#' the first element is a vector of length n containing the shape parameters of the IG prior on the variances, 
 #' 
-#' the second element similarly is of length n2 containing the corresponding scale parameters, and 
+#' the second element similarly is of length n containing the corresponding scale parameters, and 
 #' 
-#' the last element is an n2 * m matrix, where each row contains the prior
+#' the last element is an n * m matrix, where each row contains the prior
 #' variances for the regression coefficients (i.e. the diagonal of the prior covariance matrix)
 #' @export
 #'
@@ -28,14 +28,21 @@
 #' priors2 <- thetas_to_priors(thetas_ex, 500, thresh = 1e-6)
 #' 
 thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
+  # Inverse-gamma scale prior parameter vector (prior on variances)
   b <- 5 * exp(thetas[[1]]) * (1 - exp(-exp(thetas[[2]])/sqrt(0:(n - 1))))
+  # Inverse-gamma shape prior parameter vector (prior on variances)
   a <- rep(6, n)
+  # temporary vector for determining number of neighbors
+  # (based on the threshold provided as an input)
   tempor <- exp(-exp(thetas[[3]]) * (1:500))
   m <- which(tempor < thresh)[1] - 1
+  # Force at least 2 neighbors, cannot be more than 500
   if (is.na(m) | m < 2) {
     m <- 2
   }
+  # Create the prior on the coefficient variances
   g <- matrix(tempor[1:m], ncol = m, nrow = n, byrow = T)
+  # Divide by mean of the IG prior for simplicity of derivations
   g <- g/(b/(a - 1))
   return(list(a, b, g))
 }
@@ -57,10 +64,10 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #'
 #' @examples
 get_mle <- function(dat, NNarray) {
-  n2 <- ncol(dat)
+  n <- ncol(dat)
   d <- 1/sqrt(sd(dat[, 1]))
-  uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n2, n2), triangular = TRUE)
-  for (i in 2:n2) {
+  uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
+  for (i in 2:n) {
     gind <- na.omit(NNarray[i, ])
     temp <- lm(dat[, i] ~ -1 + dat[, gind])
     d <- 1/(summary.lm(temp)$sigma)
@@ -113,16 +120,16 @@ get_mle <- function(dat, NNarray) {
 #' posteriors <- get_posts(data, priors[[1]], priors[[2]], priors[[3]], NNarray)
 #' 
 get_posts <- function(datum, a, b, g, NNarray) {
-  n2 <- ncol(datum)
+  n <- ncol(datum)
   N <- nrow(datum)
   m <- ncol(g)
-  a_post <- rep(0, n2)
-  b_post <- rep(0, n2)
-  muhat_post <- matrix(NA, nrow = n2, ncol = m)
-  G_post <- array(NA, dim = c(m, m, n2))
+  a_post <- rep(0, n)
+  b_post <- rep(0, n)
+  muhat_post <- matrix(NA, nrow = n, ncol = m)
+  G_post <- array(NA, dim = c(m, m, n))
   a_post <- a + N/2
   b_post[1] <- b[1] + t(datum[, 1] %*% datum[, 1])/2
-  for (i in 2:n2) {
+  for (i in 2:n) {
     gind <- na.omit(NNarray[i, 1:m])
     nn <- length(gind)
     xi <- -datum[, gind]
@@ -158,11 +165,11 @@ get_posts <- function(datum, a, b, g, NNarray) {
 #'
 #' @examples
 samp_posts <- function(posts, NNarray) {
-  n2 <- nrow(NNarray)
+  n <- nrow(NNarray)
   m <- ncol(posts[[3]])
   d <- (1/sqrt(posts[[2]][1])) * exp(lgamma((2 * posts[[1]][1] + 1)/2) - lgamma(posts[[1]][1]))
-  uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n2, n2), triangular = TRUE)
-  for (i in 2:n2) {
+  uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
+  for (i in 2:n) {
     gind <- na.omit(NNarray[i, 1:m])
     nn <- length(gind)
     # d <- rinvgamma(mcl, posts[[1]][i], posts[[2]][i])
@@ -174,9 +181,9 @@ samp_posts <- function(posts, NNarray) {
 }
 
 minus_loglikeli <- function(x, datum, NNarray, N) {
-  n2 <- nrow(NNarray)
+  n <- nrow(NNarray)
   ap <- 6 + N/2
-  pr <- thetas_to_priors(x, n2)
+  pr <- thetas_to_priors(x, n)
   m <- min(ncol(pr[[3]]), ncol(NNarray))
   if (m < 2) {
     m <- 2
@@ -184,7 +191,7 @@ minus_loglikeli <- function(x, datum, NNarray, N) {
   b <- pr[[2]]
   g <- pr[[3]]
   sums <- 6 * log(b[1]) - ap * log(b[1] + crossprod(datum[, 1])/2)
-  for (i in 2:n2) {
+  for (i in 2:n) {
     gind <- na.omit(NNarray[i, 1:m])
     nn <- length(gind)
     # browser()

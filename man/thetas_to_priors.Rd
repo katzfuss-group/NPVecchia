@@ -17,11 +17,11 @@ hyperparameter, defaults to 1e-3}
 \value{
 List of priors, where 
 
-the first element is a vector of length n2 containing the shape parameters of the IG prior on the variances, 
+the first element is a vector of length n containing the shape parameters of the IG prior on the variances, 
 
-the second element similarly is of length n2 containing the corresponding scale parameters, and 
+the second element similarly is of length n containing the corresponding scale parameters, and 
 
-the last element is an n2 * m matrix, where each row contains the prior
+the last element is an n * m matrix, where each row contains the prior
 variances for the regression coefficients (i.e. the diagonal of the prior covariance matrix)
 }
 \description{
