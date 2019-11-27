@@ -244,7 +244,7 @@ minus_loglikeli <- function(thetas, datum, NNarray) {
   b <- pr[[2]]
   g <- pr[[3]]
   # get the first element for the log-likelihood
-  sums <- 6 * log(b[1]) - a_post * log(b[1] + crossprod(datum[, 1])/2)
+  loglikelihood <- 6 * log(b[1]) - a_post * log(b[1] + crossprod(datum[, 1])/2)
   for (i in 2:n) {
     # get nearest neighbors and how many there are as nn
     gind <- na.omit(NNarray[i, 1:m])
@@ -266,12 +266,12 @@ minus_loglikeli <- function(thetas, datum, NNarray) {
     # get the posterior of b (IG scale parameter)
     b_post <- b[i] + (crossprod(yi) - t(muhat) %*% Ginv %*% muhat)/2
     # calculate the determinant term of the integrated likelihood
-    ldet <- -0.5 * (2 * sum(log(na.omit(diag(Ginv_chol)))) + (sum(log(g[i, 1:nn]))))
+    log_det <- -0.5 * (2 * sum(log(na.omit(diag(Ginv_chol)))) + (sum(log(g[i, 1:nn]))))
     # calculate the term based on the ratio of IG parameters
-    lb <- 6 * log(b[i]) - a_post * log(b_post)
+    log_ig <- 6 * log(b[i]) - a_post * log(b_post)
     # Add these values to the log integrated likelihood
-    sums <- sums + ldet + lb
+    loglikelihood <- loglikelihood + log_det + log_ig
   }
   # Return the negative of the log integrated likelihood
-  return(c(-sums))
+  return(c(-loglikelihood))
 }
