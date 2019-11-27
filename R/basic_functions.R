@@ -93,7 +93,7 @@ get_mle <- function(datum, NNarray) {
     stop("At least 2 neighbors are required (2 or more columns in NNarray)")
   }
   if(! is.integer(NNarray)){
-    stop("NNarray must consist of only integers (and/or NAs)!")
+    warning("NNarray should consist of only integers (and/or NAs)!")
   }
   # get n
   n <- ncol(datum)
