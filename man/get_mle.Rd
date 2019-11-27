@@ -11,7 +11,7 @@ get_mle(dat, NNarray)
 
 \item{NNarray}{an n * m matrix giving the m nearest neighbors previous in the ordering (or 
 outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
-for nearest to furthest. Required: m < N}
+for nearest to furthest. Required: m < N, m >= 2}
 }
 \value{
 Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 

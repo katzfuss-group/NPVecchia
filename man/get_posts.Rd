@@ -18,7 +18,7 @@ get_posts(datum, a, b, g, NNarray)
 \item{NNarray}{an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 for nearest to furthest. It is OK to have m2 > m, as it will be reduced to match the size
-of the matrix g.}
+of the matrix g, but never have m2 < 2.}
 }
 \value{
 List of posterior arguments, where

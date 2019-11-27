@@ -13,7 +13,8 @@ custom values as long as the sizes match the output from get_posts.}
 \item{NNarray}{an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
 for nearest to furthest. It is OK to have m2 large, as it will be reduced to match the size
-of the posterior means (i.e. number of columns in the third element of the posteriors).}
+of the posterior means (i.e. number of columns in the third element of the posteriors), but
+never have m2 < 2.}
 }
 \value{
 Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 
