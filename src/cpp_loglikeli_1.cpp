@@ -133,24 +133,24 @@ arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
   // n2: number of locations
   int n2 = arma::as_scalar(NNarray.n_rows);
   // get posteriors from list into vectors/matrices
-  arma::vec ap = posts[0];
-  arma::vec bp = posts[1];
-  arma::mat mup = posts[2];
+  arma::vec a_post = posts[0];
+  arma::vec b_post = posts[1];
+  arma::mat mu_post = posts[2];
   // m: number of neighbors
-  int m = mup.n_cols;
+  int m = mu_post.n_cols;
   // create sparse matrix
   arma::sp_mat uhat(n2, n2);
   // fill in first value with posterior mean of 1/sqrt(error)
-  uhat(0,0) = (1.0 / sqrt(bp(0))) * exp(lgamma((2.0 * ap(0) + 1.0) / 2.0) - lgamma(ap(0)));
+  uhat(0,0) = (1.0 / sqrt(b_post(0))) * exp(lgamma((2.0 * a_post(0) + 1.0) / 2.0) - lgamma(a_post(0)));
   for (int i = 1; i < n2; i++) {
     // get neighbor indices
     arma::vec gind = na_omit_c(NNarray.row(i).head(m).t());
     // get 1/sqrt(error) posterior mean and put it on the diagonal
-    double tempd = 1.0 / sqrt(bp(i)) * exp(lgamma((2.0 * ap(i) + 1.0) / 2.0) - lgamma(ap(i)));
+    double tempd = 1.0 / sqrt(b_post(i)) * exp(lgamma((2.0 * a_post(i) + 1.0) / 2.0) - lgamma(a_post(i)));
     uhat(i,i) = tempd;
     // scale the coefficients and fill them into the sparse matrix accordingly
     for (int j = 0; j < gind.n_rows + 0.0; j++){
-      uhat(gind(j), i) = mup(i, j) * tempd;
+      uhat(gind(j), i) = mu_post(i, j) * tempd;
     }
   }
   return uhat;
@@ -168,7 +168,7 @@ double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const 
   int n2 = arma::as_scalar(NNarray.n_rows);
   double N = arma::as_scalar(datum.n_rows);
   // IG posterior shape
-  double ap = 6.0 + N / 2.0;
+  double a_post = 6.0 + N / 2.0;
   // get priors from the function, turn it into matrices/vectors instead of List
   List temp_priors = thetas_to_priors_c(thetas, n2);
   arma::mat g = temp_priors[2];
@@ -176,7 +176,7 @@ double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const 
   // get m (number of neighbors), as either the maximum allowed during construction or from the prior
   double m = min(size(g)(1) + 0.0, size(NNarray)(1) + 0.0);
   // create ll for the integrated likelihood and calculate the first element to sum
-  double ll = 6.0 * log(b(0)) - ap * log(b(0) + arma::accu(pow(datum.col(0), 2)) / 2);
+  double loglikelihood = 6.0 * log(b(0)) - a_post * log(b(0) + arma::accu(pow(datum.col(0), 2)) / 2);
   for (int i  = 1; i < n2; i++){
     // get m nearest neighbors
     arma::vec gind = na_omit_c(NNarray.row(i).head(m).t());
@@ -206,12 +206,12 @@ double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const 
     // get IG posterior scale as b + (y'y - muhat' Ginvv muhat)/2
     double b_post = b(i) + (accu(pow(yi, 2)) - as_scalar(muhat.t() * Ginv * muhat)) / 2.0;
     // negative of calculate (log) determinant term sqrt(|G| / |g|)
-    double ldet = 0.5 * (2.0 * accu(log(Ginv_chol.diag())) + accu(log(g.row(i).head(gind.n_elem - 0.0))));
+    double log_det = 0.5 * (2.0 * accu(log(Ginv_chol.diag())) + accu(log(g.row(i).head(gind.n_elem - 0.0))));
     // calculate (log) last term b^a / b_post^a_post
-    double lb = 6.0 * log(b(i)) - ap * log(b_post);
+    double log_ig = 6.0 * log(b(i)) - a_post * log(b_post);
     // sum with previous log-likelihood
-    ll +=  lb - ldet;
+    loglikelihood +=  log_ig - log_det;
   }
-  ll *= -1;
-  return ll;
+  loglikelihood *= -1;
+  return loglikelihood;
 }
