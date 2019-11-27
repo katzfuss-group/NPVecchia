@@ -63,6 +63,17 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #' @export
 #'
 #' @examples
+#' 
+#' #create fake data and fake neighbor matrix
+#' datum <- matrix(rnorm(1e4), nrow = 10)
+#' NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
+#' #can only use previous points in ordering (this is actually 
+#' #impossible in low dimensional space like this is designed for)
+#' for(i in 1:100){
+#'   NNarray[i:1e3,i] <- i
+#' }
+#' #Return sparse Cholesky of the precision matrix
+#' uhat <- get_mle(datum, NNarray)
 get_mle <- function(dat, NNarray) {
   # get n
   n <- ncol(dat)
@@ -115,7 +126,7 @@ get_mle <- function(dat, NNarray) {
 #' @examples
 #' 
 #' #create fake data and fake neighbor matrix
-#' data <- matrix(rnorm(1e4), nrow = 10)
+#' datum <- matrix(rnorm(1e4), nrow = 10)
 #' NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
@@ -124,7 +135,7 @@ get_mle <- function(dat, NNarray) {
 #' }
 #' priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 #' 
-#' posteriors <- get_posts(data, priors, NNarray)
+#' posteriors <- get_posts(datum, priors, NNarray)
 #' 
 get_posts <- function(datum, priors, NNarray) {
   #get b, g priors from the list
@@ -192,8 +203,8 @@ get_posts <- function(datum, priors, NNarray) {
 #'
 #' @examples
 #' 
-#' #' #create fake data and fake neighbor matrix
-#' data <- matrix(rnorm(1e4), nrow = 10)
+#' #create fake data and fake neighbor matrix
+#' datum <- matrix(rnorm(1e4), nrow = 10)
 #' NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
@@ -202,7 +213,7 @@ get_posts <- function(datum, priors, NNarray) {
 #' }
 #' priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 #' 
-#' posteriors <- get_posts(data, priors, NNarray)
+#' posteriors <- get_posts(datum, priors, NNarray)
 #' 
 #' uhat <- samp_posts(posteriors, NNarray)
 #' 
@@ -245,8 +256,8 @@ samp_posts <- function(posts, NNarray) {
 #'
 #' @examples
 #' 
-#' #' #create fake data and fake neighbor matrix
-#' data <- matrix(rnorm(1e4), nrow = 10)
+#' #create fake data and fake neighbor matrix
+#' datum <- matrix(rnorm(1e4), nrow = 10)
 #' NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)

@@ -29,8 +29,8 @@ hyperparameters.
 }
 \examples{
 
-#' #create fake data and fake neighbor matrix
-data <- matrix(rnorm(1e4), nrow = 10)
+#create fake data and fake neighbor matrix
+datum <- matrix(rnorm(1e4), nrow = 10)
 NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
 #can only use previous points in ordering (this is actually 
 #impossible in low dimensional space like this is designed for)

@@ -11,7 +11,7 @@ get_mle(dat, NNarray)
 
 \item{NNarray}{an n * m matrix giving the m nearest neighbors previous in the ordering (or 
 outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
-for nearest to furthest. Required: m < N, m >= 2}
+from closest to furthest away. Required: m < N, m >= 2}
 }
 \value{
 Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 
@@ -20,4 +20,17 @@ such that \deqn{\Omega = U U'}
 \description{
 For each regression, the MLE is used (i.e. the coefficients and residual standard error obtained from lm). 
 This will only work when N > m (or lm will have issues), so call the function accordingly.
+}
+\examples{
+
+#create fake data and fake neighbor matrix
+datum <- matrix(rnorm(1e4), nrow = 10)
+NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
+#can only use previous points in ordering (this is actually 
+#impossible in low dimensional space like this is designed for)
+for(i in 1:100){
+  NNarray[i:1e3,i] <- i
+}
+#Return sparse Cholesky of the precision matrix
+uhat <- get_mle(datum, NNarray)
 }
