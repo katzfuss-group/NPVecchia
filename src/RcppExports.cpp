@@ -31,17 +31,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // get_posts_c
-List get_posts_c(const arma::mat& datum, const arma::vec& a, const arma::vec& b, const arma::mat& g, const arma::mat& NNarray);
-RcppExport SEXP _NPVecchia_get_posts_c(SEXP datumSEXP, SEXP aSEXP, SEXP bSEXP, SEXP gSEXP, SEXP NNarraySEXP) {
+List get_posts_c(const arma::mat& datum, List priors, const arma::mat& NNarray);
+RcppExport SEXP _NPVecchia_get_posts_c(SEXP datumSEXP, SEXP priorsSEXP, SEXP NNarraySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const arma::mat& >::type datum(datumSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type a(aSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type b(bSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type g(gSEXP);
+    Rcpp::traits::input_parameter< List >::type priors(priorsSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type NNarray(NNarraySEXP);
-    rcpp_result_gen = Rcpp::wrap(get_posts_c(datum, a, b, g, NNarray));
+    rcpp_result_gen = Rcpp::wrap(get_posts_c(datum, priors, NNarray));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -74,7 +72,7 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_NPVecchia_na_omit_c", (DL_FUNC) &_NPVecchia_na_omit_c, 1},
     {"_NPVecchia_thetas_to_priors_c", (DL_FUNC) &_NPVecchia_thetas_to_priors_c, 3},
-    {"_NPVecchia_get_posts_c", (DL_FUNC) &_NPVecchia_get_posts_c, 5},
+    {"_NPVecchia_get_posts_c", (DL_FUNC) &_NPVecchia_get_posts_c, 3},
     {"_NPVecchia_samp_posts_c", (DL_FUNC) &_NPVecchia_samp_posts_c, 2},
     {"_NPVecchia_minus_loglikeli_c", (DL_FUNC) &_NPVecchia_minus_loglikeli_c, 3},
     {NULL, NULL, 0}

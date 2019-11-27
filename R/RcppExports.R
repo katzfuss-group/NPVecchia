@@ -28,8 +28,8 @@ thetas_to_priors_c <- function(thetas, n, thresh = 1e-3) {
 #' 
 #' This is the C++ version of \code{\link{get_posts}}. See there for further documentation.
 #' 
-get_posts_c <- function(datum, a, b, g, NNarray) {
-    .Call(`_NPVecchia_get_posts_c`, datum, a, b, g, NNarray)
+get_posts_c <- function(datum, priors, NNarray) {
+    .Call(`_NPVecchia_get_posts_c`, datum, priors, NNarray)
 }
 
 #' Creates posterior mean sparse matrix from posteriors

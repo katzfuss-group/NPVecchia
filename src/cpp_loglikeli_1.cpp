@@ -71,7 +71,8 @@ List thetas_to_priors_c(const arma::vec& thetas, const int n, const double thres
 //' 
 // [[Rcpp::export]]
 List get_posts_c(const arma::mat& datum, List priors, const arma::mat& NNarray) {
-  // get b,g priors from list input
+  // get a, b, g priors from list input
+  arma::vec a = priors[0];
   arma::vec b = priors[1];
   arma::mat g = priors[2];
   // n2, N, m as usual: number of locations, number of replications and number of neighbors
@@ -85,9 +86,8 @@ List get_posts_c(const arma::mat& datum, List priors, const arma::mat& NNarray) 
   // normal mean (muhat_post) and variances (G_post where each slice is for one regression) of regression coefficients
   arma::mat muhat_post = arma::zeros(n2, m);
   arma::cube G_post(m, m, n2, fill::zeros);
-  // a and a_post are constant in our set-up
-  // a_post.fill(a(0) + N / 2.0);
-  a_post = priors[0] + N / 2.0;
+  // a and a_post are constant in our set-up but for generality:
+  a_post = a + N / 2.0;
   b_post(0) = b(0) + arma::as_scalar(datum.col(0).t() * datum.col(0)) / 2.0;
   // loop through all regressions
   for (int i = 1; i < n2; i++) {
