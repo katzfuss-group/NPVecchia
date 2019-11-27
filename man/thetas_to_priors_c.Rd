@@ -6,9 +6,16 @@
 \usage{
 thetas_to_priors_c(thetas, n, thresh = 0.001)
 }
+\arguments{
+\item{thetas}{3 real numbers representing the three hyperparameters}
+
+\item{n}{the number of locations}
+
+\item{thresh}{the threshold for determining the number of neighbors based on the third
+hyperparameter, defaults to 1e-3
+
+It is often about the same speed as the R version of this function due to little computational cost.}
+}
 \description{
 This is the C++ version of \code{\link{thetas_to_priors}}. See there for further documentation.
-}
-\details{
-It is often about the same speed as the R version of this function due to little computational cost.
 }

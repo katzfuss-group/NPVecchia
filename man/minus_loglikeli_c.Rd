@@ -6,6 +6,17 @@
 \usage{
 minus_loglikeli_c(thetas, datum, NNarray)
 }
+\arguments{
+\item{thetas}{3 real numbers representing the three hyperparameters}
+
+\item{datum}{an N * n matrix of the data (N replications of n locations/variables)}
+
+\item{NNarray}{an n * m2 matrix giving the m nearest neighbors previous in the ordering (or
+outputting NAs if not available [i.e. there are not m previous points]) that are ordered
+from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
+of the posterior means (i.e. number of columns in the third element of the posteriors), but
+never have m2 < 2.}
+}
 \description{
 This is the C++ version of \code{\link{minus_loglikeli}}. See there for further documentation.
 }

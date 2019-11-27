@@ -4,7 +4,19 @@
 \alias{get_posts_c}
 \title{Gets posteriors of Bayesian methodology}
 \usage{
-get_posts_c(datum, a, b, g, NNarray)
+get_posts_c(datum, priors, NNarray)
+}
+\arguments{
+\item{datum}{an N * n matrix of the data (N replications of n locations/variables)}
+
+\item{priors}{a list of length 3 containing the priors for the shape of the IG prior,
+the scale of the IG prior, and the prior variances of the coefficients (i.e. the output from
+thetas_to_priors)}
+
+\item{NNarray}{an n * m2 matrix giving the m nearest neighbors previous in the ordering (or
+outputting NAs if not available [i.e. there are not m previous points]) that are ordered
+from closest to furthest away. It is OK to have m2 > m, as it will be reduced to match the size
+of the matrix g, but never have m2 < 2.}
 }
 \description{
 This is the C++ version of \code{\link{get_posts}}. See there for further documentation.

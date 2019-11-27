@@ -38,6 +38,11 @@ arma::vec na_omit_c(arma::vec x){
 //' 
 //' This is the C++ version of \code{\link{thetas_to_priors}}. See there for further documentation.
 //' 
+//' @param thetas 3 real numbers representing the three hyperparameters
+//' @param n the number of locations
+//' @param thresh the threshold for determining the number of neighbors based on the third
+//' hyperparameter, defaults to 1e-3
+//' 
 //' It is often about the same speed as the R version of this function due to little computational cost.
 // [[Rcpp::export]]
 List thetas_to_priors_c(const arma::vec& thetas, const int n, const double thresh = 1e-3) {
@@ -68,6 +73,15 @@ List thetas_to_priors_c(const arma::vec& thetas, const int n, const double thres
 //' Gets posteriors of Bayesian methodology
 //' 
 //' This is the C++ version of \code{\link{get_posts}}. See there for further documentation.
+//' 
+//' @param datum an N * n matrix of the data (N replications of n locations/variables)
+//' @param priors a list of length 3 containing the priors for the shape of the IG prior,
+//'    the scale of the IG prior, and the prior variances of the coefficients (i.e. the output from
+//'    thetas_to_priors)
+//' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or
+//'    outputting NAs if not available [i.e. there are not m previous points]) that are ordered
+//'    from closest to furthest away. It is OK to have m2 > m, as it will be reduced to match the size
+//'    of the matrix g, but never have m2 < 2.
 //' 
 // [[Rcpp::export]]
 List get_posts_c(const arma::mat& datum, List priors, const arma::mat& NNarray) {
@@ -131,6 +145,15 @@ List get_posts_c(const arma::mat& datum, List priors, const arma::mat& NNarray) 
 //' Creates posterior mean sparse matrix from posteriors
 //' 
 //' This is the C++ version of \code{\link{samp_posts}}. See there for further documentation.
+//' 
+//' @param posts a List of the posteriors from get_posts (or get_posts_c); alternatively it can be
+//' custom values as long as the sizes match the output from get_posts.
+//' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or
+//'    outputting NAs if not available [i.e. there are not m previous points]) that are ordered
+//'    from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
+//'    of the posterior means (i.e. number of columns in the third element of the posteriors), but
+//'    never have m2 < 2.
+//'    
 // [[Rcpp::export]]
 arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
   // n2: number of locations
@@ -164,6 +187,14 @@ arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
 //' This is the C++ version of \code{\link{minus_loglikeli}}. See there for further documentation.
 //' 
 //' This function is much faster than the R version, making it preferable.
+//' 
+//' @param thetas 3 real numbers representing the three hyperparameters
+//' @param datum an N * n matrix of the data (N replications of n locations/variables)
+//' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or
+//'   outputting NAs if not available [i.e. there are not m previous points]) that are ordered
+//'   from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
+//'   of the posterior means (i.e. number of columns in the third element of the posteriors), but
+//'   never have m2 < 2.
 //' 
 // [[Rcpp::export]]
 double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray){
