@@ -7,7 +7,8 @@
 minus_loglikeli(thetas, datum, NNarray, threshh = 0.001)
 }
 \arguments{
-\item{thetas}{3 real numbers representing the three hyperparameters}
+\item{thetas}{3 real numbers representing the three hyperparameters; as it is on the log scale,
+it should generally be between -6 and 4 to avoid numerical issues (overflow or underflow)}
 
 \item{datum}{an N * n matrix of the data (N replications of n locations/variables)}
 

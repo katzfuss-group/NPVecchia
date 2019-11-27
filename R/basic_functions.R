@@ -4,7 +4,8 @@
 #' hyperparameters described in the mathematical description. The coefficients are assumed to have zero
 #' mean apriori, so only three prior elements are returned (the variance shape/scale, and the coefficnet variances).
 #'
-#' @param thetas 3 real numbers representing the three hyperparameters
+#' @param thetas 3 real numbers representing the three hyperparameters; as it is on the log scale,
+#' it should generally be between -6 and 4 to avoid numerical issues (overflow or underflow)
 #' @param n the number of locations
 #' @param thresh the threshold for determining the number of neighbors based on the third
 #' hyperparameter, defaults to 1e-3 
@@ -28,6 +29,12 @@
 #' priors2 <- thetas_to_priors(thetas_ex, 500, thresh = 1e-6)
 #' 
 thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
+  if(length(thetas) != 3){
+    stop("The number of hyperparameters (elements in the first argument) must be exactly 3!")
+  }
+  if(any(thetas > 4) || any(thetas < -6)){
+    warning("A theta being too large/small will probably cause numerical issues.")
+  }
   # Inverse-gamma scale prior parameter vector (prior on variances)
   b <- 5 * exp(thetas[[1]]) * (1 - exp(-exp(thetas[[2]])/sqrt(0:(n - 1))))
   # Inverse-gamma shape prior parameter vector (prior on variances)
@@ -243,7 +250,8 @@ samp_posts <- function(posts, NNarray) {
 #' function is often used with an optimizer or MCMC method to find the optimal 
 #' hyperparameters.
 #'
-#' @param thetas 3 real numbers representing the three hyperparameters
+#' @param thetas 3 real numbers representing the three hyperparameters; as it is on the log scale,
+#' it should generally be between -6 and 4 to avoid numerical issues (overflow or underflow)
 #' @param datum an N * n matrix of the data (N replications of n locations/variables)
 #' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or 
 #' outputting NAs if not available [i.e. there are not m previous points]) that are ordered 
