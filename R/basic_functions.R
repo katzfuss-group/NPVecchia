@@ -64,21 +64,21 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #'
 #' @examples
 get_mle <- function(dat, NNarray) {
-  #get n
+  # get n
   n <- ncol(dat)
-  #get first regression variance
+  # get first regression variance
   d <- 1/sd(dat[, 1])
-  #create sparse matrix with first entry d
+  # create sparse matrix with first entry d
   uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
   for (i in 2:n) {
-    #get indices of nearest neighbors (to regress column i on)
+    # get indices of nearest neighbors (to regress column i on)
     gind <- na.omit(NNarray[i, ])
-    #regress i on neighbors
+    # regress i on neighbors
     temp <- lm(dat[, i] ~ -1 + dat[, gind])
-    #set the diagonal element to the regression SE
+    # set the diagonal element to the regression SE
     d <- 1/(summary.lm(temp)$sigma)
     uhat[i, i] <- d
-    #set the NN elements to the scaled coefficients
+    # set the NN elements to the scaled coefficients
     uhat[gind, i] <- -coef(temp) * d
   }
   return(uhat)
@@ -127,28 +127,28 @@ get_mle <- function(dat, NNarray) {
 #' posteriors <- get_posts(data, priors[[1]], priors[[2]], priors[[3]], NNarray)
 #' 
 get_posts <- function(datum, a, b, g, NNarray) {
-  #get n, N, m
+  # get n, N, m
   n <- ncol(datum)
   N <- nrow(datum)
   m <- ncol(g)
-  #Create vectors/matrices/arrays to hold the posteriors
+  # Create vectors/matrices/arrays to hold the posteriors
   a_post <- rep(0, n)
   b_post <- rep(0, n)
   muhat_post <- matrix(NA, nrow = n, ncol = m)
   G_post <- array(NA, dim = c(m, m, n))
-  #Get posterior of a
+  # Get posterior of a
   a_post <- a + N/2
-  #Get first element of posterior of b
+  # Get first element of posterior of b
   b_post[1] <- b[1] + t(datum[, 1] %*% datum[, 1])/2
   for (i in 2:n) {
-    #set up the regression as column i ~ nearest neighbors
+    # set up the regression as column i ~ nearest neighbors
     gind <- na.omit(NNarray[i, 1:m])
     nn <- length(gind)
     xi <- -datum[, gind]
     yi <- datum[, i]
-    #Get inverse of posterior of G (coefficient variance)
+    # Get inverse of posterior of G (coefficient variance)
     Ginv <- t(xi) %*% xi + diag(g[i, 1:nn]^(-1), nrow = nn)
-    #take Cholesky
+    # take Cholesky
     Ginv_chol <- chol(Ginv)
     # G <- ginv(Ginv); muhat <- G%*%t(xi)%*%yi
     # Try to solve for muhat directly which occasionally has
@@ -159,11 +159,13 @@ get_posts <- function(datum, a, b, g, NNarray) {
       ginv(Ginv) %*% crossprod(xi, yi)
     })
     # G_post[1:nn,1:nn,i] <- G
+    # Fill in full posteriors with the elements from i'th regression
     muhat_post[i, 1:nn] <- muhat
     G_post[1:nn, 1:nn, i] <- Ginv_chol
     muhat_post[i, 1:nn] <- muhat
     b_post[i] <- b[i] + (t(yi) %*% yi - t(muhat) %*% Ginv %*% muhat)/2
   }
+  #Return list of posteriors
   return(list(a_post, b_post, muhat_post, G_post))
 }
 
@@ -185,38 +187,51 @@ get_posts <- function(datum, a, b, g, NNarray) {
 #'
 #' @examples
 samp_posts <- function(posts, NNarray) {
+  # get n, m
   n <- nrow(NNarray)
   m <- ncol(posts[[3]])
+  # Get posterior mean of d and create the sparse matrix
   d <- (1/sqrt(posts[[2]][1])) * exp(lgamma((2 * posts[[1]][1] + 1)/2) - lgamma(posts[[1]][1]))
   uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
   for (i in 2:n) {
+    # get nearest neighbors and number of them (nn)
     gind <- na.omit(NNarray[i, 1:m])
     nn <- length(gind)
-    # d <- rinvgamma(mcl, posts[[1]][i], posts[[2]][i])
+    # Fill in appropriate elements of sparse matrix with posterior means
     uhat[i, i] <- (1/sqrt(posts[[2]][i])) * exp(lgamma((2 * posts[[1]][i] + 1)/2) - lgamma(posts[[1]][i]))
-    # uhat[i,i] <- mean(1/sqrt(d))
     uhat[gind, i] <- posts[[3]][i, 1:nn] * uhat[i, i]
   }
   return(uhat)
 }
 
-minus_loglikeli <- function(x, datum, NNarray, N) {
+minus_loglikeli <- function(x, datum, NNarray) {
+  # get n, N
   n <- nrow(NNarray)
+  N <- nrow(datum)
+  # get alpha posterior
   ap <- 6 + N/2
+  # get priors
   pr <- thetas_to_priors(x, n)
+  # get m
+  # make sure m is not greater than max number of neighbors set
+  # (from NNarray creation), and force it to be at least 2
   m <- min(ncol(pr[[3]]), ncol(NNarray))
   if (m < 2) {
     m <- 2
   }
+  # get needed priors from the list of priors
   b <- pr[[2]]
   g <- pr[[3]]
+  # get the first element for the log-likelihood
   sums <- 6 * log(b[1]) - ap * log(b[1] + crossprod(datum[, 1])/2)
   for (i in 2:n) {
+    # get nearest neighbors and how many there are as nn
     gind <- na.omit(NNarray[i, 1:m])
     nn <- length(gind)
-    # browser()
+    # set up i'th regression with basic notation yi ~ xi
     xi <- -datum[, gind]
     yi <- datum[, i]
+    # Get inverse of G posterior
     Ginv <- tryCatch({
       crossprod(xi) + diag(g[i, 1:nn]^(-1), nrow = nn)
     }, error = function(e) {
@@ -228,19 +243,26 @@ minus_loglikeli <- function(x, datum, NNarray, N) {
       break
     })
     # Ginv <- crossprod(xi) + diag(g[i,1:nn]^(-1), nrow = nn)
+    # Take the Cholesky of Ginv
     Ginv_chol <- chol(Ginv)
     # G <- ginv(Ginv); muhat <- G %*% t(xi) %*% yi; muhat <- solve(Ginv_chol,
     # solve(t(Ginv_chol), initt[[i]][[2]]))
+    # Try to get muhat directly, but if Ginv_chol is not invertible, use 
+    # the generalized inverse
     muhat <- tryCatch({
       solve(Ginv_chol, solve(t(Ginv_chol), crossprod(xi, yi)))
     }, error = function(e) {
       ginv(Ginv) %*% crossprod(xi, yi)
     })
-    # G_post[1:nn,1:nn,i] <- G
+    # get the posterior of b (IG scale parameter)
     b_post <- b[i] + (crossprod(yi) - t(muhat) %*% Ginv %*% muhat)/2
+    # calculate the determinant term of the integrated likelihood
     ldet <- -0.5 * (2 * sum(log(na.omit(diag(Ginv_chol)))) + (sum(log(g[i, 1:nn]))))
+    # calculate the term based on the ratio of IG parameters
     lb <- 6 * log(b[i]) - ap * log(b_post)
+    # Add these values to the log integrated likelihood
     sums <- sums + ldet + lb
   }
+  # Return the negative of the log integrated likelihood
   return(c(-sums))
 }
