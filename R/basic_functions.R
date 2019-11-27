@@ -64,16 +64,21 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #'
 #' @examples
 get_mle <- function(dat, NNarray) {
-  #get parameters
+  #get n
   n <- ncol(dat)
+  #get first regression variance
   d <- 1/sd(dat[, 1])
-  #create sparse matrix with first entry
+  #create sparse matrix with first entry d
   uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
   for (i in 2:n) {
+    #get indices of nearest neighbors (to regress column i on)
     gind <- na.omit(NNarray[i, ])
+    #regress i on neighbors
     temp <- lm(dat[, i] ~ -1 + dat[, gind])
+    #set the diagonal element to the regression SE
     d <- 1/(summary.lm(temp)$sigma)
     uhat[i, i] <- d
+    #set the NN elements to the scaled coefficients
     uhat[gind, i] <- -coef(temp) * d
   }
   return(uhat)
@@ -122,24 +127,37 @@ get_mle <- function(dat, NNarray) {
 #' posteriors <- get_posts(data, priors[[1]], priors[[2]], priors[[3]], NNarray)
 #' 
 get_posts <- function(datum, a, b, g, NNarray) {
+  #get n, N, m
   n <- ncol(datum)
   N <- nrow(datum)
   m <- ncol(g)
+  #Create vectors/matrices/arrays to hold the posteriors
   a_post <- rep(0, n)
   b_post <- rep(0, n)
   muhat_post <- matrix(NA, nrow = n, ncol = m)
   G_post <- array(NA, dim = c(m, m, n))
+  #Get posterior of a
   a_post <- a + N/2
+  #Get first element of posterior of b
   b_post[1] <- b[1] + t(datum[, 1] %*% datum[, 1])/2
   for (i in 2:n) {
+    #set up the regression as column i ~ nearest neighbors
     gind <- na.omit(NNarray[i, 1:m])
     nn <- length(gind)
     xi <- -datum[, gind]
     yi <- datum[, i]
+    #Get inverse of posterior of G (coefficient variance)
     Ginv <- t(xi) %*% xi + diag(g[i, 1:nn]^(-1), nrow = nn)
+    #take Cholesky
     Ginv_chol <- chol(Ginv)
-    # G <- ginv(Ginv) muhat <- G%*%t(xi)%*%yi
-    muhat <- solve(Ginv_chol, solve(t(Ginv_chol), t(xi) %*% yi))
+    # G <- ginv(Ginv); muhat <- G%*%t(xi)%*%yi
+    # Try to solve for muhat directly which occasionally has
+    # numerical issues. If so, use generalized inverse of Ginv
+    muhat <- tryCatch({
+      solve(Ginv_chol, solve(t(Ginv_chol), crossprod(xi, yi)))
+    }, error = function(e) {
+      ginv(Ginv) %*% crossprod(xi, yi)
+    })
     # G_post[1:nn,1:nn,i] <- G
     muhat_post[i, 1:nn] <- muhat
     G_post[1:nn, 1:nn, i] <- Ginv_chol
