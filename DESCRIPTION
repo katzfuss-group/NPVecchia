@@ -8,6 +8,7 @@ Maintainer: Brian Kidd <bkidd@stat.tamu.edu>
 Description: A nearest-neighbor approach similar to Vecchia's is employed to quickly scale covariance estimation to high dimensions (with few samples). Only using the nearest neighbors ensures sparsity in the Cholesky of the precision matrix, while our Bayesian approach adds further regularization to the non-zero elements.
 License: GPL-2
 Imports: 
+  fields,
   MASS,
   Matrix,
   Rcpp (>= 1.0.1)
