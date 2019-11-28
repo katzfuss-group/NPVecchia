@@ -82,9 +82,11 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #' #Return sparse Cholesky of the precision matrix
 #' uhat <- get_mle(datum, NNarray)
 get_mle <- function(datum, NNarray) {
+  # make sure datum and NNarray are both matrices
   if(!(is.matrix(datum) && is.matrix(NNarray))) {
     stop("The data and NNarray must both be matrices")
   }
+  # make sure NNarray is of correct size
   if(ncol(datum) != nrow(NNarray)){
     stop(paste("The number of locations (", ncol(datum), ") must equal the number of 
                rows of the neighbor matrix but given (", nrow(NNarray), ")", sep=""))
@@ -92,6 +94,7 @@ get_mle <- function(datum, NNarray) {
   if(ncol(NNarray) < 2) {
     stop("At least 2 neighbors are required (2 or more columns in NNarray)")
   }
+  # check if NNarray is an integer matrix
   if(! is.integer(NNarray)){
     warning("NNarray should consist of only integers (and/or NAs)!")
   }
@@ -158,13 +161,40 @@ get_mle <- function(datum, NNarray) {
 #' posteriors <- get_posts(datum, priors, NNarray)
 #' 
 get_posts <- function(datum, priors, NNarray) {
+  # check if priors is of correct length
+  if(length(priors) != 3) {
+    stop("Priors should be a list of length 3!")
+  }
   #get b, g priors from the list
   b <- priors[[2]]
   g <- priors[[3]]
   # get n, N, m
   n <- ncol(datum)
   N <- nrow(datum)
-  m <- ncol(g)
+  m <- min(ncol(g), ncol(NNarray))
+  
+  # make sure datum and NNarray are both matrices
+  if(!(is.matrix(datum) && is.matrix(NNarray))) {
+    stop("The data and NNarray must both be matrices")
+  }
+  # make sure NNarray is of correct size
+  if(ncol(datum) != nrow(NNarray)){
+    stop(paste("The number of locations (", ncol(datum), ") must equal the number of 
+               rows of the neighbor matrix but given (", nrow(NNarray), ")", sep=""))
+  }
+  if(ncol(NNarray) < 2) {
+    stop("At least 2 neighbors are required (2 or more columns in NNarray)")
+  }
+  # check if NNarray is an integer matrix
+  if(! is.integer(NNarray)){
+    warning("NNarray should consist of only integers (and/or NAs)!")
+  }
+  # check if a, b, g are correct sizes
+  if(!(length(priors[[1]]) == n && length(b) == n && nrow(g) == n && ncol(g) >= 2)){
+    stop("Use priors created by thetas_to_priors for convenience. 
+          The current priors are of the wrong size.")
+  }
+  
   # Create vectors/matrices/arrays to hold the posteriors
   a_post <- rep(0, n)
   b_post <- rep(0, n)

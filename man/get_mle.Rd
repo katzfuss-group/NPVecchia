@@ -24,12 +24,12 @@ This will only work when N > m (or lm will have issues), so call the function ac
 \examples{
 
 #create fake data and fake neighbor matrix
-datum <- matrix(rnorm(2e4), nrow = 20)
-NNarray <- matrix(NA, nrow = 1e3, ncol = 5)
+datum <- matrix(rnorm(1e4), nrow = 10)
+NNarray <- matrix(NA, nrow = 1e3, ncol = 100)
 #can only use previous points in ordering (this is actually 
 #impossible in low dimensional space like this is designed for)
-for(i in 1:5){
-  NNarray[i:1e3,i] <- i
+for(i in 1:100){
+  NNarray[i:1e3, i] <- i
 }
 #Return sparse Cholesky of the precision matrix
 uhat <- get_mle(datum, NNarray)
