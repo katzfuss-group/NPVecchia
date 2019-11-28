@@ -29,9 +29,11 @@
 #' priors2 <- thetas_to_priors(thetas_ex, 500, thresh = 1e-6)
 #' 
 thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
+  # make sure there are three hyperparameters
   if(length(thetas) != 3){
     stop("The number of hyperparameters (elements in the first argument) must be exactly 3!")
   }
+  # warn if thetas are not in safe range
   if(any(thetas > 4) || any(thetas < -6)){
     warning("A theta being too large/small will probably cause numerical issues.")
   }
@@ -344,6 +346,31 @@ samp_posts <- function(posts, NNarray) {
 #' 
 #' 
 minus_loglikeli <- function(thetas, datum, NNarray, threshh = 1e-3) {
+  # make sure there are three hyperparameters
+  if(length(thetas) != 3){
+    stop("The number of hyperparameters (elements in the first argument) must be exactly 3!")
+  }
+  # warn if thetas are not in safe range
+  if(any(thetas > 4) || any(thetas < -6)){
+    warning("A theta being too large/small will probably cause numerical issues.")
+  }
+  # make sure datum and NNarray are both matrices
+  if(!(is.matrix(datum) && is.matrix(NNarray))) {
+    stop("The data and NNarray must both be matrices")
+  }
+  # make sure NNarray is of correct size
+  if(ncol(datum) != nrow(NNarray)){
+    stop(paste("The number of locations (", ncol(datum), ") must equal the number of 
+               rows of the neighbor matrix but given (", nrow(NNarray), ")", sep=""))
+  }
+  if(ncol(NNarray) < 2) {
+    stop("At least 2 neighbors are required (2 or more columns in NNarray)")
+  }
+  # check if NNarray is an integer matrix
+  if(! is.integer(NNarray)){
+    warning("NNarray should consist of only integers (and/or NAs)!")
+  }
+  
   # get n, N
   n <- nrow(NNarray)
   N <- nrow(datum)
