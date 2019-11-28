@@ -190,8 +190,8 @@ get_posts <- function(datum, priors, NNarray) {
     warning("NNarray should consist of only integers (and/or NAs)!")
   }
   # check if a, b, g are correct sizes
-  if(!(length(priors[[1]]) == n && length(b) == n && nrow(g) == n && ncol(g) >= 2)){
-    stop("Use priors created by thetas_to_priors for convenience. 
+  if(length(priors[[1]]) != n || length(b) != n || nrow(g) != n || ncol(g) < 2){
+    stop("Please use priors created by thetas_to_priors for convenience. 
           The current priors are of the wrong size.")
   }
   
@@ -271,6 +271,27 @@ samp_posts <- function(posts, NNarray) {
   # get n, m
   n <- nrow(NNarray)
   m <- ncol(posts[[3]])
+  
+  # make sure all elements in posts have a place in uhat
+  if(ncol(NNarray) < m) {
+    stop("The posteriors have more neighbors than the neighbor matrix accounts for!")
+  }
+  # check if NNarray is an integer matrix; warn if not
+  if(! is.integer(NNarray)){
+    warning("NNarray should consist of only integers (and/or NAs)!")
+  }
+  # make sure posts has 4 elements
+  if(length(posts) != 4) {
+    stop("There should be 4 elements in the list of posteriors! For simplicity,
+         it is recommended to use get_posts to generate these posteriors.")
+  }
+  # make sure posts elements are of the correct sizes
+  if(length(posts[[1]]) != n || length(posts[[2]]) != n || !all(dim(posts[[3]]) == c(n, m)) ||
+  !all(dim(posts[[4]]) == c(m, m, n))){
+    stop("Please use get_posts to generate the posteriors. Some of 
+          the current posteriors have incorrect dimensions.")
+  }
+  
   # Get posterior mean of d and create the sparse matrix
   d <- (1/sqrt(posts[[2]][1])) * exp(lgamma((2 * posts[[1]][1] + 1)/2) - lgamma(posts[[1]][1]))
   uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
