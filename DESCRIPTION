@@ -9,6 +9,7 @@ Description: A nearest-neighbor approach similar to Vecchia's is employed to qui
 License: GPL-2
 Imports: 
   fields,
+  GpGp,
   MASS,
   Matrix,
   matrixStats,
