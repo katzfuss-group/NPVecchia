@@ -100,8 +100,9 @@ get_mle <- function(datum, NNarray) {
   if(! is.integer(NNarray)){
     warning("NNarray should consist of only integers (and/or NAs)!")
   }
-  # get n
+  # get n, m
   n <- ncol(datum)
+  m <- ncol(NNarray)
   # make sure m < N for identifiability in regressions
   if(nrow(datum) <= ncol(NNarray)){
     m <- nrow(datum) - 1
