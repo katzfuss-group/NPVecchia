@@ -31,7 +31,7 @@ It is recommended to use the provided function "orderMaxMinFast" to order the da
 
 ```{r}
 #seed for reproducibility
-set.seed(528)
+set.seed(1128)
 #number of points
 n <- 30^2
 #Get the grid in 1-D
@@ -54,7 +54,7 @@ Also needed are the nearest neighbors for each point. This only needs to be done
 
 ```{r}
 #get nearest neighbors
-NNarray <- GpGp::find_ordered_nn(grd2d_ordered, 25)
+NNarray <- GpGp::find_ordered_nn(grd2d_ordered, 40)
 #Remove points as own neighbors
 NNarray <- NNarray[, -1]
 #get distances between points
@@ -131,7 +131,7 @@ $$
 covar_true_inv <- solve(covar_true)
 get_kl <- function(uhat, covar_inv) {
   # get sigma hat
-  sigma_hat <- crossprod(solve(uhat))
+  sigma_hat <- crossprod(solve(uhat, tol= 1e-35))
   # get sigma hat * sigma inv 
   cov2 <- sigma_hat %*% covar_inv
   # get its determinant
