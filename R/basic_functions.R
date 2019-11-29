@@ -102,13 +102,18 @@ get_mle <- function(datum, NNarray) {
   }
   # get n
   n <- ncol(datum)
+  # make sure m < N for identifiability in regressions
+  if(nrow(datum) <= ncol(NNarray)){
+    m <- nrow(datum) - 1
+    warning(paste("Setting m to N - 1 =", nrow(datum) - 1))
+  }
   # get first regression variance
   d <- 1/sd(datum[, 1])
   # create sparse matrix with first entry d
   uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
   for (i in 2:n) {
     # get indices of nearest neighbors (to regress column i on)
-    gind <- na.omit(NNarray[i, ])
+    gind <- na.omit(NNarray[i, 1:m])
     # regress i on neighbors
     temp <- lm(datum[, i] ~ -1 + datum[, gind])
     # set the diagonal element to the regression SE
