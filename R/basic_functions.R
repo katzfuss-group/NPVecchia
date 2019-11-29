@@ -326,6 +326,7 @@ samp_posts <- function(posts, NNarray) {
 #' never have m2 < 2.
 #' @param threshh threshold for number of neighbors (for thetas_to_priors); defaults
 #' to 1e-3
+#' @param negativ logical defaulting to true; if false, the positive log-likelihood is returned
 #'
 #' @return a numeric value (the negative log likelihood)
 #' @export
@@ -345,7 +346,7 @@ samp_posts <- function(posts, NNarray) {
 #' minus_loglikeli(c(1, 1, 1), datum, NNarray)
 #' 
 #' 
-minus_loglikeli <- function(thetas, datum, NNarray, threshh = 1e-3) {
+minus_loglikeli <- function(thetas, datum, NNarray, threshh = 1e-3, negativ = TRUE) {
   # make sure there are three hyperparameters
   if(length(thetas) != 3){
     stop("The number of hyperparameters (elements in the first argument) must be exactly 3!")
@@ -415,5 +416,6 @@ minus_loglikeli <- function(thetas, datum, NNarray, threshh = 1e-3) {
     loglikelihood <- loglikelihood + log_det + log_ig
   }
   # Return the negative of the log integrated likelihood
-  return(c(-loglikelihood))
+  loglikelihood <- ifelse(negativ, -1, 1)*c(loglikelihood)
+  return(loglikelihood)
 }

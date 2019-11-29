@@ -56,8 +56,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // minus_loglikeli_c
-double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray, const double threshh);
-RcppExport SEXP _NPVecchia_minus_loglikeli_c(SEXP thetasSEXP, SEXP datumSEXP, SEXP NNarraySEXP, SEXP threshhSEXP) {
+double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray, const double threshh, bool negativ);
+RcppExport SEXP _NPVecchia_minus_loglikeli_c(SEXP thetasSEXP, SEXP datumSEXP, SEXP NNarraySEXP, SEXP threshhSEXP, SEXP negativSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -65,7 +65,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const arma::mat& >::type datum(datumSEXP);
     Rcpp::traits::input_parameter< const arma::mat& >::type NNarray(NNarraySEXP);
     Rcpp::traits::input_parameter< const double >::type threshh(threshhSEXP);
-    rcpp_result_gen = Rcpp::wrap(minus_loglikeli_c(thetas, datum, NNarray, threshh));
+    Rcpp::traits::input_parameter< bool >::type negativ(negativSEXP);
+    rcpp_result_gen = Rcpp::wrap(minus_loglikeli_c(thetas, datum, NNarray, threshh, negativ));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -75,7 +76,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NPVecchia_thetas_to_priors_c", (DL_FUNC) &_NPVecchia_thetas_to_priors_c, 3},
     {"_NPVecchia_get_posts_c", (DL_FUNC) &_NPVecchia_get_posts_c, 3},
     {"_NPVecchia_samp_posts_c", (DL_FUNC) &_NPVecchia_samp_posts_c, 2},
-    {"_NPVecchia_minus_loglikeli_c", (DL_FUNC) &_NPVecchia_minus_loglikeli_c, 4},
+    {"_NPVecchia_minus_loglikeli_c", (DL_FUNC) &_NPVecchia_minus_loglikeli_c, 5},
     {NULL, NULL, 0}
 };
 

@@ -4,7 +4,7 @@
 \alias{minus_loglikeli}
 \title{Calculates the integrated log likelihood}
 \usage{
-minus_loglikeli(thetas, datum, NNarray, threshh = 0.001)
+minus_loglikeli(thetas, datum, NNarray, threshh = 0.001, negativ = TRUE)
 }
 \arguments{
 \item{thetas}{3 real numbers representing the three hyperparameters; as it is on the log scale,
@@ -20,6 +20,8 @@ never have m2 < 2.}
 
 \item{threshh}{threshold for number of neighbors (for thetas_to_priors); defaults
 to 1e-3}
+
+\item{negativ}{logical defaulting to true; if false, the positive log-likelihood is returned}
 }
 \value{
 a numeric value (the negative log likelihood)

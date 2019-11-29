@@ -4,7 +4,7 @@
 \alias{minus_loglikeli_c}
 \title{Calculates the integrated log likelihood}
 \usage{
-minus_loglikeli_c(thetas, datum, NNarray, threshh = 0.001)
+minus_loglikeli_c(thetas, datum, NNarray, threshh = 0.001, negativ = TRUE)
 }
 \arguments{
 \item{thetas}{3 real numbers representing the three hyperparameters}
@@ -19,6 +19,8 @@ never have m2 < 2.}
 
 \item{threshh}{threshold for number of neighbors (for thetas_to_priors); defaults
 to 1e-3}
+
+\item{negativ}{boolean defaulting to true; if false, the positive log-likelihood is returned}
 }
 \description{
 This is the C++ version of \code{\link{minus_loglikeli}}. See there for further documentation.

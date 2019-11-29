@@ -77,8 +77,9 @@ samp_posts_c <- function(posts, NNarray) {
 #'   never have m2 < 2.
 #' @param threshh threshold for number of neighbors (for thetas_to_priors); defaults
 #'   to 1e-3
+#' @param negativ boolean defaulting to true; if false, the positive log-likelihood is returned
 #'   
-minus_loglikeli_c <- function(thetas, datum, NNarray, threshh = 1e-3) {
-    .Call(`_NPVecchia_minus_loglikeli_c`, thetas, datum, NNarray, threshh)
+minus_loglikeli_c <- function(thetas, datum, NNarray, threshh = 1e-3, negativ = TRUE) {
+    .Call(`_NPVecchia_minus_loglikeli_c`, thetas, datum, NNarray, threshh, negativ)
 }
 

@@ -197,10 +197,11 @@ arma::sp_mat samp_posts_c(List posts, const arma::mat& NNarray){
 //'   never have m2 < 2.
 //' @param threshh threshold for number of neighbors (for thetas_to_priors); defaults
 //'   to 1e-3
+//' @param negativ boolean defaulting to true; if false, the positive log-likelihood is returned
 //'   
 // [[Rcpp::export]]
 double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray,
-                         const double threshh = 1e-3){
+                         const double threshh = 1e-3, bool negativ = true){
   // get number of points n2 and number of repetitions per point N
   int n2 = arma::as_scalar(NNarray.n_rows);
   double N = arma::as_scalar(datum.n_rows);
@@ -249,6 +250,6 @@ double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const 
     // sum with previous log-likelihood
     loglikelihood +=  log_ig - log_det;
   }
-  loglikelihood *= -1;
+  loglikelihood *= (-2.0 * negativ + 1);
   return loglikelihood;
 }
