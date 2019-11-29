@@ -79,7 +79,7 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
 #' for(i in 1:100){
-#'   NNarray[i:1e3, i] <- i
+#'   NNarray[(i + 1):1e3, i] <- i
 #' }
 #' #Return sparse Cholesky of the precision matrix
 #' uhat <- get_mle(datum, NNarray)
@@ -156,7 +156,7 @@ get_mle <- function(datum, NNarray) {
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
 #' for(i in 1:100){
-#'   NNarray[i:1e3, i] <- i
+#'   NNarray[(i + 1):1e3, i] <- i
 #' }
 #' priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 #' 
@@ -261,7 +261,7 @@ get_posts <- function(datum, priors, NNarray) {
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
 #' for(i in 1:100){
-#'   NNarray[i:1e3, i] <- i
+#'   NNarray[(i + 1):1e3, i] <- i
 #' }
 #' priors <- thetas_to_priors(c(1, 1, 1), 1e3)
 #' 
@@ -338,7 +338,7 @@ samp_posts <- function(posts, NNarray) {
 #' #can only use previous points in ordering (this is actually 
 #' #impossible in low dimensional space like this is designed for)
 #' for(i in 1:100){
-#'   NNarray[i:1e3, i] <- i
+#'   NNarray[(i + 1):1e3, i] <- i
 #' }
 #' 
 #' #calculates log likelihood
