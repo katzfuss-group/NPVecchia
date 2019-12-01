@@ -5,7 +5,7 @@ NPVecchia
 
 <!-- badges: start -->
 <!-- badges: end -->
-The goal of NPVecchia is to provide users with scalable GP covariance estimation without assuming its form. It provides some of the barebones functionality to accompany an upcoming paper with Dr. Katzfuss. The C++ implementation was specifically done for this package, as was a lot of formatting, functionality, and error checking improvements.
+The goal of NPVecchia is to provide users with scalable GP covariance estimation without assuming its form. It provides some of the barebones functionality to accompany an upcoming paper with Dr. Katzfuss.
 
 Installation
 ------------
@@ -17,7 +17,7 @@ You can install the development version from [GitHub](https://github.com/) with:
 devtools::install_github("the-kidd17/NPVecchia")
 ```
 
-Example
--------
+Vignettes
+---------
 
-Needs creation...
+There are two vignettes provided with the package: Usage and Math. "Usage" develops a detailed example, with explanations and suggestions for optimal usage. "Math" provides the basics behind the Bayesian method for advanced users.
