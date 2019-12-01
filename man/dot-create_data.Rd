@@ -21,7 +21,7 @@ Lastly, I was curious to see how internal functions work, as it is "good coding 
 }
 \examples{
 
-create_data(diag(2), 10)
+.create_data(diag(2), 10)
 
 }
 \keyword{internal}

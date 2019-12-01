@@ -12,7 +12,7 @@
 #' 
 #' @examples
 #' 
-#' create_data(diag(2), 10)
+#' .create_data(diag(2), 10)
 #' 
 .create_data <- function(covar_true, N) {
   
