@@ -92,6 +92,8 @@ $$
 
 ```{r}
 uhat_mle <- get_mle(datum, NNarray)
+#Or to decreate the number of neighbors
+uhat_mle <- get_mle(datum, NNarray[, 1:9])
 ```
 
 The Bayesian version is more involved, but adds a prior to further regularize the non-zero elements. See the math vignette for the mathematical details of the method. The priors on all of the regression rely on 3 hyperparameters that must be optimized for the best results. To avoid numerical instabilities, it is recommended to force the hyperparameters to be in the range $[-6,4]. One way to find good hyperparameters is to optimize the integrated log-likelihood as shown below.
@@ -121,11 +123,15 @@ posteriors <- get_posts(datum, priors_final, NNarray)
 uhat <- samp_posts(posteriors, NNarray)
 ```
 
+## Error metrics
+
 To see the difference, we can evaluate Stein's loss (the exclusive Kullback-Leibler divergence). It is defined as
 
 $$
 KL(\hat{\Sigma} || \Sigma) = tr(\hat{\Sigma} \Sigma^{-1}) - log |\hat{\Sigma}\Sigma^{-1}| - n
 $$
+
+When the number of neighbors is high, the "MLE" version of $\hat{U}$ is not invertible, so some care is needed in choosing $m < N$ for the frequentist method. Alternatively, the regressions can be replaced with some sort of lasso to ensure smaller $m$.
 
 ```{r}
 covar_true_inv <- solve(covar_true)
@@ -140,5 +146,17 @@ get_kl <- function(uhat, covar_inv) {
 }
 show(paste("The KL-divergence for our method is", get_kl(uhat, covar_true_inv),
            " while it is", get_kl(uhat_mle, covar_true_inv), "for the MLE."))
+```
+
+Alternatively, to avoid having to invert the Cholesky, the frobenius norm (or other metric, such as singular value differences) can be computed compared to the true precision matrix.
+
+```{r}
+precision_frobenius <- function(uhat, covar_inv) {
+  # get estimated precision
+  precision_hat <- Matrix::tcrossprod(uhat)
+  sqrt(sum((precision_hat - covar_inv)^2))
+}
+show(paste("The Frobenius norm for our method is", precision_frobenius(uhat, covar_true_inv),
+           " while it is", precision_frobenius(uhat_mle, covar_true_inv), "for the MLE."))
 ```
 
