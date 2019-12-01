@@ -10,10 +10,6 @@
 #' @return an N * n matrix with each row corresponding to a replication of all covariates/locations
 #' @keywords internal
 #' 
-#' @examples
-#' 
-#' .create_data(diag(2), 10)
-#' 
 .create_data <- function(covar_true, N) {
   
   # Lazy creation of data

@@ -19,9 +19,4 @@ Improves readability for data creation rather than having to call mvrnorm each t
 there are many alternatives to mvrnorm in R, which isn't important for the package usefulness.
 Lastly, I was curious to see how internal functions work, as it is "good coding practice."
 }
-\examples{
-
-.create_data(diag(2), 10)
-
-}
 \keyword{internal}
