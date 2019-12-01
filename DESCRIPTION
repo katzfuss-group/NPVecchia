@@ -3,7 +3,7 @@ Type: Package
 Title: Large Scale Covariance Estimation
 Version: 0.1
 Date: 2019-11-21
-Authors@R: person("Brian","Kidd", email = "bkidd@stat.tamu.edu", role = c("aut", "cre"))
+Authors@R: person("Brian", "Kidd", email = "bkidd@stat.tamu.edu", role = c("aut", "cre"))
 Maintainer: Brian Kidd <bkidd@stat.tamu.edu>
 Description: A nearest-neighbor approach similar to Vecchia's is employed to quickly scale covariance estimation to high dimensions (with few samples). Only using the nearest neighbors ensures sparsity in the Cholesky of the precision matrix, while our Bayesian approach adds further regularization to the non-zero elements.
 License: GPL-2

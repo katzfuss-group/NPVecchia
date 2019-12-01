@@ -10,26 +10,22 @@
 }
 \details{
 
-The DESCRIPTION file:
-\packageDESCRIPTION{NPVecchia}
-\packageIndices{NPVecchia}
-~~ An overview of how to use the package, including the most important functions ~~
+The main functions are listed below (and have C++ versions by adding "_c" to the name). See the vignette for further details.
+
+minus_loglikeli gives the integrated log-likelihood as a function of 3 hyperparameters
+
+thetas_to_priors gives a List of the priors from the hyperparameters
+
+get_posts gets the posteriors from these priors
+
+samp_posts gets the MAP from the posteriors to give an estimate
 }
 \author{
-\packageAuthor{NPVecchia}
+Brian Kidd
 
 Maintainer: \packageMaintainer{NPVecchia}
 }
 \references{
-~~ Literature or other references for background information ~~
+Eventually, this will include a link to the Arxiv paper.
 }
-~~ Optionally other standard keywords, one per line, from file KEYWORDS in the R documentation ~~
-~~ directory ~~
 \keyword{ package }
-\seealso{
-~~ Optional links to other man pages, e.g. ~~
-~~ \code{\link[<pkg>:<pkg>-package]{<pkg>}} ~~
-}
-\examples{
-~~ simple examples of the most important functions ~~
-}
