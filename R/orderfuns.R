@@ -1,7 +1,7 @@
 # These functions were not written by me! They are from another
 # package in development that is not yet installable. Also, they 
 # can be found in the BRISC package, but these are internal and 
-# not callable from that package either.
+# not callable from that package.
 
 #' Max-min ordering function
 #' 
@@ -39,7 +39,11 @@ orderMaxMinFast <- function( locs, numpropose ){
     orderinds
 }
 
-# ordered by distance to some point loc0
+#' Order by distance to some point loc0
+#' @param locs locations to order by distance to point loc0
+#'
+#' @param loc0 reference point for ordering locations
+#'
 #' @keywords internal
 orderDist2Point <- function( locs, loc0 ){
     d <- ncol(locs)
@@ -48,7 +52,10 @@ orderDist2Point <- function( locs, loc0 ){
     orderinds <- order(distvec)
 }
 
-# ordered by distance to the center
+#' Order by distance to the center
+#' 
+#' @param locs locations to order
+#'
 #' @keywords internal
 orderMiddleOut <- function( locs ){
     d <- ncol(locs)
@@ -56,6 +63,12 @@ orderMiddleOut <- function( locs ){
     orderDist2Point(locs,loc0)
 }
 
+#' Order by one a single coordinate
+#' 
+#' @param locs locations to order
+#'
+#' @param coordinate index of the coordinate to order by
+#'
 #' @keywords internal
 orderByCoordinate <- function( locs, coordinate ){
     # coordinate can be a single coordinate in {1,2,..,d}
