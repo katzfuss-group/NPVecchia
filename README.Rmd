@@ -110,7 +110,7 @@ uhat_mle <- get_mle(datum, NNarray)
 uhat_mle <- get_mle(datum, NNarray[, 1:9])
 ```
 
-The Bayesian version is more involved, but adds a prior to further regularize the non-zero elements. See the [Math vignette](doc/math.pdf) for the mathematical details of the method. The priors on all of the regression rely on 3 hyperparameters that must be optimized for the best results. To avoid numerical instabilities, it is recommended to force the hyperparameters to be in the range $[-6,4]. One way to find good hyperparameters is to optimize the integrated log-likelihood as shown below.
+The Bayesian version is more involved, but adds a prior to further regularize the non-zero elements. See the [Math vignette](documents/math.pdf) for the mathematical details of the method. The priors on all of the regression rely on 3 hyperparameters that must be optimized for the best results. To avoid numerical instabilities, it is recommended to force the hyperparameters to be in the range $[-6,4]. One way to find good hyperparameters is to optimize the integrated log-likelihood as shown below.
 
 
 **Note:** Another alternative is to use MCMC to get a distribution on the hyperparameters. This is very sensitive to inputs, is often not computationally feasible, and is not included. If one is set on MCMC, "adaptMCMC" is an easy to use package that includes an adaptive Metropolis-Hastings algorithm. It improves mixing and adaptively accounts for our correlated hyperparameters.
