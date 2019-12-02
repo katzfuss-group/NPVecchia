@@ -98,11 +98,9 @@ datum <- MASS::mvrnorm(N, rep(0, nrow(covar_true)), covar_true)
 
 ## Methodology
 
-To keep the explanation simple, we estimate the Cholesky of the precision matrix using a series of simple linear regressions. The twist is that we only regress on the nearest neighbors spatially to drastically improve the computational cost. The frequentist version is "get_mle", which performs the regressions with a known sparsity pattern to find the sparse matrix $\hat{U}$ such that
+To keep the explanation simple, we estimate the Cholesky of the precision matrix using a series of simple linear regressions. The twist is that we only regress on the nearest neighbors spatially to drastically improve the computational cost. The frequentist version is "get_mle", which performs the regressions with a known sparsity pattern to find the sparse matrix &#219; such that
 
-$$
-\Sigma^{-1} = \hat{U} \hat{U}'
-$$
+![equation](https://latex.codecogs.com/png.latex?%5CSigma%5E%7B-1%7D%20%3D%20%5Chat%7BU%7D%20%5Chat%7BU%7D%27)
 
 ```{r}
 uhat_mle <- get_mle(datum, NNarray)
@@ -110,7 +108,7 @@ uhat_mle <- get_mle(datum, NNarray)
 uhat_mle <- get_mle(datum, NNarray[, 1:9])
 ```
 
-The Bayesian version is more involved, but adds a prior to further regularize the non-zero elements. See the [Math vignette](documents/math.pdf) for the mathematical details of the method. The priors on all of the regression rely on 3 hyperparameters that must be optimized for the best results. To avoid numerical instabilities, it is recommended to force the hyperparameters to be in the range $[-6,4]. One way to find good hyperparameters is to optimize the integrated log-likelihood as shown below.
+The Bayesian version is more involved, but adds a prior to further regularize the non-zero elements. See the [Math vignette](documents/math.pdf) for the mathematical details of the method. The priors on all of the regression rely on 3 hyperparameters that must be optimized for the best results. To avoid numerical instabilities, it is recommended to force the hyperparameters to be in the range [-6,4]. One way to find good hyperparameters is to optimize the integrated log-likelihood as shown below.
 
 
 **Note:** Another alternative is to use MCMC to get a distribution on the hyperparameters. This is very sensitive to inputs, is often not computationally feasible, and is not included. If one is set on MCMC, "adaptMCMC" is an easy to use package that includes an adaptive Metropolis-Hastings algorithm. It improves mixing and adaptively accounts for our correlated hyperparameters.
@@ -125,7 +123,7 @@ thetas_best <- optim(thetas_init, minus_loglikeli_c, datum = datum,
 show(thetas_best)
 ```
 
-With these optimal hyperparameters, it is straightforward to get $\hat{U}$.
+With these optimal hyperparameters, it is straightforward to get &#219; as follows:
 
 ```{r}
 #get priors
@@ -141,11 +139,9 @@ uhat <- samp_posts(posteriors, NNarray)
 
 To see the difference, we can evaluate Stein's loss (the exclusive Kullback-Leibler divergence). It is defined as
 
-$$
-KL(\hat{\Sigma} || \Sigma) = tr(\hat{\Sigma} \Sigma^{-1}) - log |\hat{\Sigma}\Sigma^{-1}| - n
-$$
+![equation](https://latex.codecogs.com/png.latex?KL%28%5Chat%7B%5CSigma%7D%20%7C%7C%20%5CSigma%29%20%3D%20tr%28%5Chat%7B%5CSigma%7D%20%5CSigma%5E%7B-1%7D%29%20-%20log%20%7C%5Chat%7B%5CSigma%7D%5CSigma%5E%7B-1%7D%7C%20-%20n)
 
-When the number of neighbors is high, the "MLE" version of $\hat{U}$ is not invertible, so some care is needed in choosing $m < N$ for the frequentist method. Alternatively, the regressions can be replaced with some sort of lasso to ensure smaller $m$.
+When the number of neighbors is high, the "MLE" version of &#219; is not invertible, so some care is needed in choosing $m < N$ for the frequentist method. Alternatively, the regressions can be replaced with some sort of lasso to ensure smaller $m$.
 
 ```{r}
 covar_true_inv <- solve(covar_true)
