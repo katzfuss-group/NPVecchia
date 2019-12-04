@@ -17,7 +17,10 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of NPVecchia is to provide users with scalable GP covariance estimation without assuming its form. It provides some of the barebones functionality to accompany an upcoming paper with Dr. Katzfuss. 
+The goal of NPVecchia is to provide users with scalable Gaussian Process (GP) covariance estimation without assuming its form. We assume that the GP is de-trended (has zero mean) and that the covariance between points decreases with distance. Importantly, since this method was developed for spatial data, we also assume that the locations of the samples are known and in a low dimensional Euclidean space. The final output of the methods provided in this package is a sparse estimate of the inverse of the Cholesky of the covariance matrix. It provides some of the barebones functionality to accompany an upcoming paper with Dr. Katzfuss. 
+
+Many of the functions have C++ counterparts by adding "_c" to their names. However, there is no error checking, so errors that occur tend to be difficult to interpret and fix. That is the big use for the R versions: to understand the functions and usage better (with error-checking) before worrying about speed.
+
 
 ## Installation
 
@@ -25,23 +28,17 @@ You can install the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("the-kidd17/NPVecchia")
+devtools::install_github("the-kidd17/NPVecchia", auth_token = "10a6d01e1d65ff744e39674cb07c5fe257320e69")
 ```
-# Further Details
+# Detailed Example
 
 ```{r message=FALSE, warning=FALSE, include=FALSE}
 library(NPVecchia)
 ```
 
-This package was created specifically for spatial data, as the locations are known and in a low dimensional (usually 2 or 3) Euclidean space. If one already has data, it is still recommended to read the next section to understand how to order the locations and get the nearest neighbors.
-
-Many of the functions have C++ counterparts by adding "_c" to their names. However, there is no error checking, so errors that occur tend to be difficult to interpret and fix. That is the big use for the R versions: to understand the functions and usage better (with error-checking) before worrying about speed.
-
 ## Data Creation
 
-As a first step to experimenting with the package, data must be simulated. These examples will be on a 2-D grid, though the method generalizes to not gridded data and probably to somewhat higher dimensions. We use a unit square as the domain for simplicity; by changing the range (also known as scale) parameter in spatial covariance functions, the data can similarly be rescaled to a unit square.
-
-It is recommended to use the provided function "orderMaxMinFast" to order the data in a max-min ordering. Basically, this ordering starts at a point in the center, then adds points one at a time that maximize the minimum distance from all previous points in the ordering. While not required, the decay of the both the regression errors and coefficients (i.e. the prior) is implicitly based on this ordering.
+As a first step to experimenting with the package, data must be simulated. These examples will be on a 2-D grid, though the method generalizes to random (ungridded) data. We use a unit square as the domain for simplicity; by changing the range (also known as scale) parameter in spatial covariance functions, the data can be rescaled to a unit square.
 
 ```{r}
 #seed for reproducibility
@@ -54,13 +51,54 @@ grd <- seq(0, 1, length.out = sqrt(n))
 grd2d <- expand.grid(grd, grd)
 #Alternative for random (non-gridded) data
 #grd2d <- matrix(runif(2 * n), ncol = 2)
+```
 
+
+#### Ordering
+
+It is recommended to use the provided function "orderMaxMinFast" to order the data in a max-min ordering. Basically, this ordering starts at a point in the center, then adds points one at a time that maximize the minimum distance from all previous points in the ordering. While not required, the decay of the both the regression errors and coefficients (i.e. the prior) was specifically developed based on this ordering.
+
+```{r}
 #Order the grid points
 order_mmd <- orderMaxMinFast(grd2d, n^2)
 grd2d_ordered <- grd2d[order_mmd, ]
 ```
 
+#### Covariance Function
+
 Now, with the locations, a covariance function is needed. As is common in spatial, this example will create a Matern covariance matrix. The package doesn't rely on functions for using other covariance matrices, but two useful packages for other covariance functions are 'geoR' and 'RandomFields'. 
+
+```{r}
+#get distances between points
+distances <- fields::rdist(grd2d_ordered)
+
+# #If one wants anisotropic distances instead
+# mahala_dist <- function(a, b, Aniso_matrix) {
+#   sqrt(c(t(a - b) %*% solve(Aniso_matrix, a - b)))
+# }
+# mahala_dist_vect <- Vectorize(mahala_dist)
+# grd2d_ord_list <- as.list(data.frame(t(grd2d_ordered)))
+# dists <- outer(grd2d_ord_list, grd2d_ord_list, mahala_dist_vect, 
+#                Aniso_matrix = matrix(c(0.5, 0, 0, 1), ncol = 2))
+
+#Specify parameters of the covariance matrix
+marginal_variance <- 3
+#for unit square, range < 0.5 is recommended to avoid numerical issues
+range <- 0.25
+#smoothness should similarly not be too large
+smoothness <- 1
+
+#create the true covariance matrix
+covar_true <- marginal_variance * fields::Matern(distances, range = range, 
+                                         nu = smoothness)
+
+#Number of replications
+N <- 50
+#Create data (can use any multivariate normal function)
+datum <- MASS::mvrnorm(N, rep(0, nrow(covar_true)), covar_true)
+```
+
+#### Nearest neighbors
 
 Also needed are the nearest neighbors for each point. This only needs to be done once, so it is useful to allow the number of neighbors to be large (it will often be decreased automatically by the method). This outputs a matrix where each row corresponds to that points' nearest neighbors (ordered from closest to furthest; NAs fill other spots). Our methodology does not include each point as a neighbor of itself, so the first column (that gives each point) is removed.
 
@@ -71,29 +109,6 @@ Also needed are the nearest neighbors for each point. This only needs to be done
 NNarray <- GpGp::find_ordered_nn(grd2d_ordered, 40)
 #Remove points as own neighbors
 NNarray <- NNarray[, -1]
-#get distances between points
-distances <- fields::rdist(grd2d_ordered)
-# #If one wants anisotropic distances instead
-# mahala_dist <- function(a, b, Aniso_matrix) {
-#   sqrt(c(t(a - b) %*% solve(Aniso_matrix, a - b)))
-# }
-# mahala_dist_vect <- Vectorize(mahala_dist)
-# grd2d_ord_list <- as.list(data.frame(t(grd2d_ordered)))
-# dists <- outer(grd2d_ord_list, grd2d_ord_list, mahala_dist_vect, 
-#                Aniso_matrix = matrix(c(0.5, 0, 0, 1), ncol = 2))
-#Specify parameters of the covariance matrix
-marginal_variance <- 3
-#for unit square, range < 0.5 is recommended to avoid numerical issues
-range <- 0.25
-#smoothness should similarly not be too large
-smoothness <- 1
-#create the true covariance matrix
-covar_true <- marginal_variance * fields::Matern(distances, range = range, 
-                                         nu = smoothness)
-#Create data (can use whatever way one desires)
-#Number of replications
-N <- 50
-datum <- MASS::mvrnorm(N, rep(0, nrow(covar_true)), covar_true)
 ```
 
 ## Methodology
@@ -104,14 +119,15 @@ To keep the explanation simple, we estimate the Cholesky of the precision matrix
 
 ```{r}
 uhat_mle <- get_mle(datum, NNarray)
-#Or to decreate the number of neighbors
+#Or to decrease the number of neighbors
 uhat_mle <- get_mle(datum, NNarray[, 1:9])
 ```
 
-The Bayesian version is more involved, but adds a prior to further regularize the non-zero elements. See the [Math vignette](documents/math.pdf) for the mathematical details of the method. The priors on all of the regression rely on 3 hyperparameters that must be optimized for the best results. To avoid numerical instabilities, it is recommended to force the hyperparameters to be in the range [-6,4]. One way to find good hyperparameters is to optimize the integrated log-likelihood as shown below.
+The Bayesian version is more involved, but adds a prior to further regularize the non-zero elements. See the [Math vignette](documents/math.pdf) for the mathematical details of the method. The priors on all of the regressions rely on 3 hyperparameters that can be optimized for the best results. To avoid numerical instabilities, it is recommended to force the hyperparameters to be in the range [-6,4]. The simplest way to find the best hyperparameters is to optimize the integrated log-likelihood as shown below.
 
 
 **Note:** Another alternative is to use MCMC to get a distribution on the hyperparameters. This is very sensitive to inputs, is often not computationally feasible, and is not included. If one is set on MCMC, "adaptMCMC" is an easy to use package that includes an adaptive Metropolis-Hastings algorithm. It improves mixing and adaptively accounts for our correlated hyperparameters.
+
 
 ```{r}
 #define initialize thetas (starting values)
@@ -135,7 +151,7 @@ posteriors <- get_posts(datum, priors_final, NNarray)
 uhat <- samp_posts(posteriors, NNarray)
 ```
 
-## Error metrics
+## Evaluation
 
 To see the difference, we can evaluate Stein's loss (the exclusive Kullback-Leibler divergence). It is defined as
 
