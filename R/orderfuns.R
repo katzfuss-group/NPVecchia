@@ -79,7 +79,7 @@ orderByCoordinate <- function( locs, coordinate ){
     order(rowSums(locs[,coordinate,drop=FALSE]))
 }
 
-#' Find Nearest neighbors
+#' Find nearest neighbors based on a covariance matrix
 #'
 #' @param cov.matrix an (ordered) covariance matrix to use for finding NN based on
 #' this distance (1 - correlation)

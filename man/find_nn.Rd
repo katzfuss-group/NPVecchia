@@ -2,7 +2,7 @@
 % Please edit documentation in R/orderfuns.R
 \name{find_nn}
 \alias{find_nn}
-\title{Find Nearest neighbors}
+\title{Find nearest neighbors based on a covariance matrix}
 \usage{
 find_nn(cov.matrix, m)
 }
@@ -16,5 +16,5 @@ this distance (1 - correlation)}
 a matrix of nearest neighbors of dimension n x m
 }
 \description{
-Find Nearest neighbors
+Find nearest neighbors based on a covariance matrix
 }
