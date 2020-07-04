@@ -19,46 +19,19 @@ order_maximin_dist <- function(d){
   
   ## compute maxmin ordering
   #Get current column
-  min <- d[,ord[1]]
+  mint <- d[,ord[1]]
   for(i in 2:n){
     #Get the maximum minimum distance
-    a <- which.max(min)
+    a <- which.max(mint)
     #Add it as the next point in the ordering
     ord[i] <- a
     #Update the minimums. This works because the current points distance from itself
     #is zero, so it gets ignored when taking the maximum in the future (as all distances
     #must be >= 0 to be a valid distance).
-    min <- pmin(min, d[,a])
+    mint <- pmin(mint, d[,a])
   }
   #returns the ordering
   return(ord)
-}
-
-
-#' Faster maximin ordering by locations
-#' 
-#' This function is a wrapper for \code{\link{order_maximin_dist}} to take in locations as
-#' input and then calculate the whole distance matrix for ordering. The alternative is to use 
-#' \code{\link{orderMaxMinFast}}, but that is much slower assuming the whole distance 
-#' matrix fits in memory. However, the first point in the ordering is calculated differently.
-#' This uses the smallest rowSum (so somewhat central to the point cloud), while
-#' \code{\link{orderMaxMinFast}} uses the point closest to the average of locations.
-#'
-#' @param locs matrix of locations of points (to match input argument of rdist, see ?rdist)
-#'
-#' @return Maximin ordering of the locations
-#' @export
-#'
-#' @examples
-#' num_points <- 1000
-#' locations <- matrix(runif(2 * num_points), nc = 2)
-#' order_locs <- order_mm_locations(locations)
-#' 
-order_mm_locations <- function(locs){
-  #Get distances
-  d <- rdist(locs)
-  #order using the ordering by distance function
-  return(order_maximin_dist(d))
 }
 
 
@@ -85,4 +58,66 @@ order_mm_tapered <- function(locs, datum, tapering_range = 0.5){
   #Covariance matrix to a distance matrix
   d = 1 - cov2cor(cov_matrix)
   return(order_maximin_dist(d))
+}
+
+#' Faster maximin ordering by Euclidean distance
+#' 
+#' Assumes Euclidean distance and finds maximin ordering. It is equivalent to \code{\link{order_maximin_dist}}
+#' but much faster.
+#'
+#' @param locs matrix of n locations in arbitrary dimension (to match input argument of fields::rdist)
+#' @param low_mem flag that changes the memory requirements of the function. Defaults to false, which allows
+#' the function to calculate the full distance matrix between all locations. If set to true, it will only calculate
+#' one column of the distance matrix at a time, which slows down the function but also decreases memory requirements.
+#'
+#' @return Maximin ordering of the points
+#' @export
+#'
+#' @examples
+orderMaxMinFaster <- function(locs, low_mem = FALSE){
+  ## number of locations to order and number of dimensions
+  n <- nrow(locs)
+  dimens <- ncol(locs)
+  
+  ## initialize ordering
+  ord = numeric(length = n)
+  #get first location (point closest to center)
+  mp <- matrix(colMeans(locs),1,dimens)
+  distmp <- rdist(locs,mp)
+  ord[1] = which.min(distmp)
+  
+  #get distances if low_mem = FALSE
+  if(!low_mem){
+    d = rdist(locs)
+    mint <- d[,ord[1]]
+    ## compute maxmin ordering
+    #Get current column
+    for(i in 2:n){
+      #Get the maximum minimum distance
+      a <- which.max(mint)
+      #Add it as the next point in the ordering
+      ord[i] <- a
+      #Update the minimums. This works because the current points distance from itself
+      #is zero, so it gets ignored when taking the maximum in the future (as all distances
+      #must be >= 0 to be a valid distance).
+      mint <- pmin(mint, d[,a])
+    }
+  }else{
+    #Get current minimums
+    mint <- rdist(locs, t(locs[ord[1],]))
+    for(i in 2:n){
+      #Get the maximum minimum distance
+      a <- which.max(mint)
+      #Add it as the next point in the ordering
+      ord[i] <- a
+      #Get distances from next point in ordering
+      d_temp = rdist(locs, t(locs[a,]))
+      #Update the minimums. This works because the current points distance from itself
+      #is zero, so it gets ignored when taking the maximum in the future (as all distances
+      #must be >= 0 to be a valid distance).
+      mint = pmin(mint, d_temp)
+    }
+  }
+  #returns the ordering
+  return(ord)
 }
