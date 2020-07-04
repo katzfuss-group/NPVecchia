@@ -102,7 +102,7 @@ datum <- MASS::mvrnorm(N, rep(0, nrow(covar_true)), covar_true)
 
 Also needed are the nearest neighbors for each point. This only needs to be done once, so it is useful to allow the number of neighbors to be large (it will often be decreased automatically by the method). This outputs a matrix where each row corresponds to that points' nearest neighbors (ordered from closest to furthest; NAs fill other spots). Our methodology does not include each point as a neighbor of itself, so the first column (that gives each point) is removed.
 
-**Note**: if using an Anisotropic and/or non-stationary covariance, the ordering and/or neighborhood selection will not be optimal without accounting for it. Currently, these just use the spatial locations and are sub-optimal, though they are still better than random or coordinate-based orderings. Newer versions may include improved functionality for this.
+**Note**: if using an Anisotropic and/or non-stationary covariance, the ordering and/or neighborhood selection will not be optimal without accounting for it. Below the function for simply finding neighbors by spatial distance are the extensions for finding ordering and neighbors using the tapered sample covariance matrix (using correlation ordering).
 
 ```{r}
 #get nearest neighbors
@@ -110,6 +110,18 @@ NNarray <- GpGp::find_ordered_nn(grd2d_ordered, 40)
 #Remove points as own neighbors
 NNarray <- NNarray[, -1]
 ```
+
+```{r}
+#Finds new coorelation ordering based on locations and data
+order_cmmd <- order_mm_tapered(grd2d_ordered, datum)
+#Reorders data and locations to match the correlation ordering
+datum <- datum[, order_cmmd]
+grd2d_ordered <- grd2d_ordered[order_cmmd, ]
+#Tapering can 
+NNarray <- find_nn(grd2d_ordered, datum, 40)
+
+```
+
 
 ## Methodology
 
