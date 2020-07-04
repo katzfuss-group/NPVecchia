@@ -10,12 +10,12 @@
 #' @examples
 order_maximin_dist <- function(d){
   ## number of locations to order
-  n=nrow(d)
+  n = nrow(d)
   
   ## initialize ordering
-  ord=numeric(length=n)
+  ord = numeric(length = n)
   #get first location (basically the most central point)
-  ord[1]=which.min(rowSums(d))
+  ord[1] = which.min(rowSums(d))
   
   ## compute maxmin ordering
   #Get current column
@@ -80,7 +80,7 @@ order_mm_locations <- function(locs){
 #' order_datum <- order_mm_covariance(sample_cov)
 order_mm_covariance <- function(cov.matrix){
   #Covariance matrix to a distance matrix
-  d=1-cov2cor(cor.mat)
+  d = 1 - cov2cor(cov.matrix)
   return(order_maximin_dist(d))
 }
 
@@ -92,7 +92,7 @@ order_mm_covariance <- function(cov.matrix){
 #' it combines \code{\link{order_mm_locations}} and \code{\link{order_mm_covariance}} and adds
 #' some tapering (by element-wise multiplying by an Exponential covariance).
 #' #'
-#' @param locs matrix of locations of points (to match input argument of rdist, see ?rdist)
+#' @param locs matrix of locations of points (to match input argument of fields::rdist)
 #' @param datum Data where column i corresponds to observations at the i'th point of locs
 #' @param tapering_range Percentage of the maximum distance for Exponential tapering
 #'
@@ -106,6 +106,6 @@ order_mm_tapered <- function(locs, datum, tapering_range = 0.5){
   exp_const <- Exponential(ds, range = (tapering_range * max(ds)))
   cov_matrix <- cov(datum) * exp_const
   #Covariance matrix to a distance matrix
-  d=1-cov2cor(cov_matrix)
+  d = 1 - cov2cor(cov_matrix)
   return(order_maximin_dist(d))
 }
