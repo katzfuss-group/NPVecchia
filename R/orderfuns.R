@@ -79,3 +79,32 @@ orderByCoordinate <- function( locs, coordinate ){
     order(rowSums(locs[,coordinate,drop=FALSE]))
 }
 
+#' Find Nearest neighbors
+#'
+#' @param cov.matrix an (ordered) covariance matrix to use for finding NN based on
+#' this distance (1 - correlation)
+#' @param m number of (ordered) nearest neighbors to calculate
+#'
+#' @return a matrix of nearest neighbors of dimension n x m
+#' @export
+#'
+#' @examples
+find_nn <- function(cov.matrix,m)
+{
+    
+    ## convert covariance matrix to correlation-based distance
+    d=1-cov2cor(cov.matrix)
+    n=nrow(cov.matrix)
+    
+    ## find ordered NN
+    #initialize
+    NN=matrix(NA,n,m)
+    for(i in 2:n){
+        # if((i %% 1000)==0) print(i)
+        #get number of neighbors, m if that many previous points
+        k=min(i-1,m)
+        NN[i,1:k]=order(d[i,1:(i-1)])[1:k]
+    }
+    
+    return(NN)
+}
