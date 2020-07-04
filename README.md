@@ -124,7 +124,7 @@ first column (that gives each point) is removed.
 ordering and/or neighborhood selection will not be optimal without
 accounting for it. Below the function for simply finding neighbors by
 spatial distance are the extensions for finding ordering and neighbors
-using the tapered sample covariance matrix (using correlation ordering).
+using the tapered sample covariance matrix (correlation ordering).
 
 ``` r
 #get nearest neighbors
@@ -134,12 +134,12 @@ NNarray <- NNarray[, -1]
 ```
 
 ``` r
-#Finds new coorelation ordering based on locations and data
+#Finds new correlation ordering based on locations and data
 order_cmmd <- order_mm_tapered(grd2d_ordered, datum)
 #Reorders data and locations to match the correlation ordering
 datum <- datum[, order_cmmd]
 grd2d_ordered <- grd2d_ordered[order_cmmd, ]
-#Tapering can 
+#Uses same tapered sample cov to get nearest neighbor matrix 
 NNarray <- find_nn(grd2d_ordered, datum, 40)
 ```
 
