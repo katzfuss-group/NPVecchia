@@ -40,7 +40,9 @@ order_maximin_dist <- function(d){
 #' This function is a wrapper for \code{\link{order_maximin_dist}} to take in locations as
 #' input and then calculate the whole distance matrix for ordering. The alternative is to use 
 #' \code{\link{orderMaxMinFast}}, but that is much slower assuming the whole distance 
-#' matrix fits in memory.
+#' matrix fits in memory. However, the first point in the ordering is calculated differently.
+#' This uses the smallest rowSum (so somewhat central to the point cloud), while
+#' \code{\link{orderMaxMinFast}} uses the point closest to the average of locations.
 #'
 #' @param locs matrix of locations of points (to match input argument of rdist, see ?rdist)
 #'
