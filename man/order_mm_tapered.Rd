@@ -7,19 +7,18 @@
 order_mm_tapered(locs, datum, tapering_range = 0.5)
 }
 \arguments{
-\item{locs}{matrix of locations of points (to match input argument of rdist, see ?rdist)}
+\item{locs}{matrix of locations of points (to match input argument of fields::rdist)}
 
 \item{datum}{Data where column i corresponds to observations at the i'th point of locs}
 
-\item{tapering_range}{Percentage of the maximum distance for Exponential tapering}
+\item{tapering_range}{Percentage of the maximum distance for Exponential tapering, which
+defaults to 1/2 the maximum distance.}
 }
 \value{
 Maximin ordering of the points
 }
 \description{
 This function is a wrapper for \code{\link{order_maximin_dist}} to take in data and
-locations to calculate the ordering based on a tapered sample covariance matrix. Basically,
-it combines \code{\link{order_mm_locations}} and \code{\link{order_mm_covariance}} and adds
-some tapering (by element-wise multiplying by an Exponential covariance).
-#'
+locations to calculate the ordering based on a tapered sample covariance matrix. It
+provides an argument to control the amount of tapering.
 }

@@ -62,39 +62,16 @@ order_mm_locations <- function(locs){
 }
 
 
-#' Maximin ordering using covariance matrix
-#'
-#' This function is a wrapper for \code{\link{order_maximin_dist}} to take in a covariance
-#' matrix as input, convert it to a distance as 1 - correlation, and thene calculates the 
-#' ordering based on that distance. \code{\link{order_mm_tapered}} is preferred unless
-#' one has a lot of replications as tapering the sample covariance improves performance.
-#'
-#' @param cov.matrix a covariance matrix
-#'
-#' @return Maximin ordering of the points corresponding to the matrix
-#' @export
-#'
-#' @examples
-#' datum <- matrix(rnorm(1e3), nc=10)
-#' sample_cov <- cov(datum)
-#' order_datum <- order_mm_covariance(sample_cov)
-order_mm_covariance <- function(cov.matrix){
-  #Covariance matrix to a distance matrix
-  d = 1 - cov2cor(cov.matrix)
-  return(order_maximin_dist(d))
-}
-
-
 #' Maximin ordering using a tapered covariance matrix
 #'
 #' This function is a wrapper for \code{\link{order_maximin_dist}} to take in data and
-#' locations to calculate the ordering based on a tapered sample covariance matrix. Basically,
-#' it combines \code{\link{order_mm_locations}} and \code{\link{order_mm_covariance}} and adds
-#' some tapering (by element-wise multiplying by an Exponential covariance).
-#' #'
+#' locations to calculate the ordering based on a tapered sample covariance matrix. It
+#' provides an argument to control the amount of tapering. 
+#' 
 #' @param locs matrix of locations of points (to match input argument of fields::rdist)
 #' @param datum Data where column i corresponds to observations at the i'th point of locs
-#' @param tapering_range Percentage of the maximum distance for Exponential tapering
+#' @param tapering_range Percentage of the maximum distance for Exponential tapering, which
+#' defaults to 1/2 the maximum distance.
 #'
 #' @return Maximin ordering of the points
 #' @export
