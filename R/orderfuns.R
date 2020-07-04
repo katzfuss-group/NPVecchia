@@ -85,6 +85,7 @@ orderByCoordinate <- function( locs, coordinate ){
 #' @param datum Data where column i corresponds to observations at the i'th point of locs
 #' @param tapering_range Percentage of the maximum distance for Exponential tapering, which
 #' defaults to 1/2 the maximum distance.
+#' @param m number of neighbors
 #'
 #' @return a matrix of nearest neighbors of dimension n x m
 #' @export
@@ -97,16 +98,16 @@ find_nn <- function(locs, datum, m, tapering_range = 0.5)
     cov_matrix <- cov(datum) * exp_const
     #Covariance matrix to a distance matrix
     d = 1 - cov2cor(cov_matrix)
-    n=nrow(cov.matrix)
+    n = nrow(d)
     
     ## find ordered NN
     #initialize
-    NN=matrix(NA,n,m)
+    NN = matrix(NA, n, m)
     for(i in 2:n){
         # if((i %% 1000)==0) print(i)
         #get number of neighbors, m if that many previous points
-        k=min(i-1,m)
-        NN[i,1:k]=order(d[i,1:(i-1)])[1:k]
+        k = min(i - 1, m)
+        NN[i, 1:k]=order(d[i, 1:(i-1)])[1:k]
     }
     
     return(NN)

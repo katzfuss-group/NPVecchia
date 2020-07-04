@@ -11,6 +11,8 @@ find_nn(locs, datum, m, tapering_range = 0.5)
 
 \item{datum}{Data where column i corresponds to observations at the i'th point of locs}
 
+\item{m}{number of neighbors}
+
 \item{tapering_range}{Percentage of the maximum distance for Exponential tapering, which
 defaults to 1/2 the maximum distance.}
 }
