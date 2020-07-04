@@ -79,21 +79,24 @@ orderByCoordinate <- function( locs, coordinate ){
     order(rowSums(locs[,coordinate,drop=FALSE]))
 }
 
-#' Find nearest neighbors based on a covariance matrix
+#' Find nearest neighbors based on a tapered covariance matrix
 #'
-#' @param cov.matrix an (ordered) covariance matrix to use for finding NN based on
-#' this distance (1 - correlation)
-#' @param m number of (ordered) nearest neighbors to calculate
+#' @param locs matrix of locations of points (to match input argument of fields::rdist)
+#' @param datum Data where column i corresponds to observations at the i'th point of locs
+#' @param tapering_range Percentage of the maximum distance for Exponential tapering, which
+#' defaults to 1/2 the maximum distance.
 #'
 #' @return a matrix of nearest neighbors of dimension n x m
 #' @export
-#'
-#' @examples
-find_nn <- function(cov.matrix,m)
+find_nn <- function(locs, datum, m, tapering_range = 0.5)
 {
-    
-    ## convert covariance matrix to correlation-based distance
-    d=1-cov2cor(cov.matrix)
+    #Get location distances for tapering
+    ds <- rdist(locs)
+    #Tapering using exponential
+    exp_const <- Exponential(ds, range = (tapering_range * max(ds)))
+    cov_matrix <- cov(datum) * exp_const
+    #Covariance matrix to a distance matrix
+    d = 1 - cov2cor(cov_matrix)
     n=nrow(cov.matrix)
     
     ## find ordered NN

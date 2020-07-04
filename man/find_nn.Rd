@@ -2,19 +2,21 @@
 % Please edit documentation in R/orderfuns.R
 \name{find_nn}
 \alias{find_nn}
-\title{Find nearest neighbors based on a covariance matrix}
+\title{Find nearest neighbors based on a tapered covariance matrix}
 \usage{
-find_nn(cov.matrix, m)
+find_nn(locs, datum, m, tapering_range = 0.5)
 }
 \arguments{
-\item{cov.matrix}{an (ordered) covariance matrix to use for finding NN based on
-this distance (1 - correlation)}
+\item{locs}{matrix of locations of points (to match input argument of fields::rdist)}
 
-\item{m}{number of (ordered) nearest neighbors to calculate}
+\item{datum}{Data where column i corresponds to observations at the i'th point of locs}
+
+\item{tapering_range}{Percentage of the maximum distance for Exponential tapering, which
+defaults to 1/2 the maximum distance.}
 }
 \value{
 a matrix of nearest neighbors of dimension n x m
 }
 \description{
-Find nearest neighbors based on a covariance matrix
+Find nearest neighbors based on a tapered covariance matrix
 }
