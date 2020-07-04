@@ -15,7 +15,7 @@ Imports:
   matrixStats,
   Rcpp (>= 1.0.1)
 LinkingTo: Rcpp, RcppArmadillo
-RoxygenNote: 7.0.0
+RoxygenNote: 7.1.0
 Encoding: UTF-8
 Suggests: 
     knitr,
