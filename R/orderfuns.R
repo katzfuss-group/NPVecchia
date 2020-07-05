@@ -89,8 +89,7 @@ orderByCoordinate <- function( locs, coordinate ){
 #'
 #' @return a matrix of nearest neighbors of dimension n x m
 #' @export
-find_nn <- function(locs, datum, m, tapering_range = 0.5)
-{
+find_nn <- function(locs, datum, m, tapering_range = 0.5){
     #Get location distances for tapering
     ds <- rdist(locs)
     #Tapering using exponential
@@ -98,6 +97,29 @@ find_nn <- function(locs, datum, m, tapering_range = 0.5)
     cov_matrix <- cov(datum) * exp_const
     #Covariance matrix to a distance matrix
     d = 1 - cov2cor(cov_matrix)
+    n = nrow(d)
+    
+    ## find ordered NN
+    #initialize
+    NN = matrix(NA, n, m)
+    for(i in 2:n){
+        # if((i %% 1000)==0) print(i)
+        #get number of neighbors, m if that many previous points
+        k = min(i - 1, m)
+        NN[i, 1:k]=order(d[i, 1:(i-1)])[1:k]
+    }
+    
+    return(NN)
+}
+
+#' Find nearest neighbors based on a distance matrix
+#'
+#' @param d distance matrix (e.g. distances)
+#' @param m number of neighbors
+#'
+#' @return a matrix of nearest neighbors of dimension n x m
+#' @export
+find_nn_dist <- function(d, m){
     n = nrow(d)
     
     ## find ordered NN
