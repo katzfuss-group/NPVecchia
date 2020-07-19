@@ -84,15 +84,6 @@ but two useful packages for other covariance functions are ‘geoR’ and
 #get distances between points
 distances <- fields::rdist(grd2d_ordered)
 
-# #If one wants anisotropic distances instead
-# mahala_dist <- function(a, b, Aniso_matrix) {
-#   sqrt(c(t(a - b) %*% solve(Aniso_matrix, a - b)))
-# }
-# mahala_dist_vect <- Vectorize(mahala_dist)
-# grd2d_ord_list <- as.list(data.frame(t(grd2d_ordered)))
-# dists <- outer(grd2d_ord_list, grd2d_ord_list, mahala_dist_vect, 
-#                Aniso_matrix = matrix(c(0.5, 0, 0, 1), ncol = 2))
-
 #Specify parameters of the covariance matrix
 marginal_variance <- 3
 #for unit square, range < 0.5 is recommended to avoid numerical issues
