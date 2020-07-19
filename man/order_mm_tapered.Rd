@@ -4,7 +4,7 @@
 \alias{order_mm_tapered}
 \title{Maximin ordering using a tapered covariance matrix}
 \usage{
-order_mm_tapered(locs, datum, tapering_range = 0.5)
+order_mm_tapered(locs, datum, tapering_range = 0.4)
 }
 \arguments{
 \item{locs}{matrix of locations of points (to match input argument of fields::rdist)}

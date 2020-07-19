@@ -92,7 +92,8 @@ List get_posts_c(const arma::mat& datum, List priors, const arma::mat& NNarray) 
   // n2, N, m as usual: number of locations, number of replications and number of neighbors
   int n2 = arma::as_scalar(NNarray.n_rows);
   int N = arma::as_scalar(datum.n_rows);
-  int m = arma::as_scalar(g.n_cols);
+  double m = min(size(g)(1) + 0.0, size(NNarray)(1) + 0.0);
+  
   // initialize posteriors of correct sizes
   // IG posterior(a_post, b_post) on variance of regressions
   arma::vec a_post = arma::zeros(n2);
