@@ -50,7 +50,7 @@ order_maximin_dist <- function(d){
 #' @export
 #'
 #' @examples
-order_mm_tapered <- function(locs, datum, tapering_range = 0.5){
+order_mm_tapered <- function(locs, datum, tapering_range = 0.4){
   #Get distances between locations
   ds <- rdist(locs)
   exp_const <- Exponential(ds, range = (tapering_range * max(ds)))
