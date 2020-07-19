@@ -8,6 +8,12 @@
 #' @export
 #'
 #' @examples
+#' n <- 100
+#' fake_dists <- matrix(runif(n^2), nc = n)
+#' #make it a valid distance matrix by making d(a,a) = 0
+#' diag(fake_dists) <- 0
+#' order_mm <- order_maximin_dist(fake_dists)
+#' #reorder data
 order_maximin_dist <- function(d){
   ## number of locations to order
   n = nrow(d)
@@ -44,12 +50,21 @@ order_maximin_dist <- function(d){
 #' @param locs matrix of locations of points (to match input argument of fields::rdist)
 #' @param datum Data where column i corresponds to observations at the i'th point of locs
 #' @param tapering_range Percentage of the maximum distance for Exponential tapering, which
-#' defaults to 1/2 the maximum distance.
+#' defaults to 0.4 * the maximum distance.
 #'
 #' @return Maximin ordering of the points
 #' @export
 #'
 #' @examples
+#' n <- 100
+#' d <- 2
+#' N <- 50
+#' locationss <- matrix(runif(n * d), nc = d)
+#' dataa <- matrix(rnorm(n * N), nr = N)
+#' order_mm <- order_mm_tapered(locationss, dataa)
+#' #reorder locations/data
+#' locationss <- locationss[order_mm, ]
+#' dataa <- dataa[, order_mm]
 order_mm_tapered <- function(locs, datum, tapering_range = 0.4){
   #Get distances between locations
   ds <- rdist(locs)
@@ -74,6 +89,10 @@ order_mm_tapered <- function(locs, datum, tapering_range = 0.4){
 #' @export
 #'
 #' @examples
+#' #' n <- 100
+#' d <- 3
+#' locationss <- matrix(runif(n * d), nc = d)
+#' ordering <- orderMaxMinFaster(locationss)
 orderMaxMinFaster <- function(locs, low_mem = FALSE){
   ## number of locations to order and number of dimensions
   n <- nrow(locs)

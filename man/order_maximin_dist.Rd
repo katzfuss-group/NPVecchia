@@ -15,3 +15,11 @@ Maximin ordering of the points corresponding to the matrix
 \description{
 This function orders the points in a maximin ordering based on distance.
 }
+\examples{
+n <- 100
+fake_dists <- matrix(runif(n^2), nc = n)
+#make it a valid distance matrix by making d(a,a) = 0
+diag(fake_dists) <- 0
+order_mm <- order_maximin_dist(fake_dists)
+#reorder data
+}
