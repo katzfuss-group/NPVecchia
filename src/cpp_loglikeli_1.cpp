@@ -145,7 +145,8 @@ List get_posts_c(const arma::mat& datum, List priors, const arma::mat& NNarray) 
 
 //' Creates posterior mean sparse matrix from posteriors
 //' 
-//' This is the C++ version of \code{\link{samp_posts}}. See there for further documentation.
+//' This is the C++ version of \code{\link{samp_posts}}. See there for further documentation. Currently,
+//' this does not have the added Bayesian and uhat functionality of samp_posts.
 //' 
 //' @param posts a List of the posteriors from get_posts (or get_posts_c); alternatively it can be
 //' custom values as long as the sizes match the output from get_posts.

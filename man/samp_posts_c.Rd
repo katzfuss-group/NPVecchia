@@ -17,5 +17,6 @@ of the posterior means (i.e. number of columns in the third element of the poste
 never have m2 < 2.}
 }
 \description{
-This is the C++ version of \code{\link{samp_posts}}. See there for further documentation.
+This is the C++ version of \code{\link{samp_posts}}. See there for further documentation. Currently,
+this does not have the added Bayesian and uhat functionality of samp_posts.
 }
