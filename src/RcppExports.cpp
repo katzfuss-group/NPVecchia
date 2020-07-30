@@ -70,6 +70,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// get_map
+arma::sp_mat get_map(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray, const double threshh);
+RcppExport SEXP _NPVecchia_get_map(SEXP thetasSEXP, SEXP datumSEXP, SEXP NNarraySEXP, SEXP threshhSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::vec& >::type thetas(thetasSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type datum(datumSEXP);
+    Rcpp::traits::input_parameter< const arma::mat& >::type NNarray(NNarraySEXP);
+    Rcpp::traits::input_parameter< const double >::type threshh(threshhSEXP);
+    rcpp_result_gen = Rcpp::wrap(get_map(thetas, datum, NNarray, threshh));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_NPVecchia_na_omit_c", (DL_FUNC) &_NPVecchia_na_omit_c, 1},
@@ -77,6 +91,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_NPVecchia_get_posts_c", (DL_FUNC) &_NPVecchia_get_posts_c, 3},
     {"_NPVecchia_samp_posts_c", (DL_FUNC) &_NPVecchia_samp_posts_c, 2},
     {"_NPVecchia_minus_loglikeli_c", (DL_FUNC) &_NPVecchia_minus_loglikeli_c, 5},
+    {"_NPVecchia_get_map", (DL_FUNC) &_NPVecchia_get_map, 4},
     {NULL, NULL, 0}
 };
 

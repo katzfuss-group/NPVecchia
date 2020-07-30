@@ -255,3 +255,81 @@ double minus_loglikeli_c(const arma::vec& thetas, const arma::mat& datum, const 
   loglikelihood *= (-2.0 * negativ + 1);
   return loglikelihood;
 }
+
+//' Creates MAP (maximum a posteriori) sparse matrix from thetas
+//' 
+//' This is basically a combination of thetas_to_priors, get_posts, and samp_posts so one does not
+//' have to store the posteriors in memory (that is more for Bayesian uses).
+//' 
+//' @param thetas 3 real numbers representing the three hyperparameters
+//' @param datum an N * n matrix of the data (N replications of n locations/variables)
+//' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or
+//'   outputting NAs if not available [i.e. there are not m previous points]) that are ordered
+//'   from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
+//'   of the posterior means (i.e. number of columns in the third element of the posteriors), but
+//'   never have m2 < 2.
+//' @param threshh threshold for number of neighbors (for thetas_to_priors); defaults
+//'   to 1e-3
+//'   
+// [[Rcpp::export]]
+arma::sp_mat get_map(const arma::vec& thetas, const arma::mat& datum, const arma::mat& NNarray,
+                     const double threshh = 1e-3){
+  // get number of points n2 and number of repetitions per point N
+  int n2 = arma::as_scalar(NNarray.n_rows);
+  double N = arma::as_scalar(datum.n_rows);
+  // IG posterior shape
+  double a_post = 6.0 + N / 2.0;
+  // get priors from the function, turn it into matrices/vectors instead of List
+  List temp_priors = thetas_to_priors_c(thetas, n2, threshh);
+  arma::mat g = temp_priors[2];
+  arma::vec b = temp_priors[1];
+  // get m (number of neighbors), as either the maximum allowed during construction or from the prior
+  double m = min(size(g)(1) + 0.0, size(NNarray)(1) + 0.0);
+  // create sparse matrix
+  arma::sp_mat uhat(n2, n2);
+  //b_post double (placeholder and first loc)
+  double b_post = b(0) + arma::as_scalar(datum.col(0).t() * datum.col(0)) / 2.0;
+  // first marginal variance
+  double tempd = (1.0 / sqrt(b_post)) * exp(lgamma((2.0 * a_post + 1.0) / 2.0) - lgamma(a_post));
+  uhat(0,0) = tempd;
+  //loop over all columns
+  for (int i = 1; i < n2; i++) {
+    // get neighbor indices
+    arma::vec gind = na_omit_c(NNarray.row(i).head(m).t());
+    // nn: number of neighbors
+    int nn = arma::as_scalar(gind.n_elem);
+    // set-up regression as Yi ~ Xi
+    arma::mat xi = -datum.cols(conv_to<uvec>::from(gind));
+    arma::vec yi = datum.col(i);
+    // get inverse of G_post in closed form
+    arma::mat Ginv = xi.t() * xi + diagmat(1 / g.row(i).head(nn));
+    // get Cholesky
+    arma::mat Ginv_chol = arma::chol(Ginv);
+    // tryCATCH version of this double solve to get the posterior mean of the coefficients
+    // arma::vec muhat = solve(Ginv_chol, solve(Ginv_chol.t(), xi.t() * yi));
+    arma::vec temp_mu, muhat;
+    // see if solve(Ginv_chol.t(), xi.t() * yi) works
+    bool status = solve(temp_mu, Ginv_chol.t(), xi.t() * yi);
+    // if solve fails, use generalized inverse to calculate G*X'*y
+    if (! status){
+      muhat = pinv(Ginv) * (xi.t() * yi);
+    } else {
+      // see if solve(Ginv_chol, temp_mu) fails
+      bool status2 = solve(muhat, Ginv_chol, temp_mu);
+      // if this solve fails, use generalized inverse to calculate G*X'*y
+      if (!status2){
+        muhat = pinv(Ginv) * (xi.t() * yi);
+      }
+    }
+    //get b_post
+    b_post = b(i) + arma::as_scalar(yi.t() * yi - muhat.t() * Ginv * muhat) / 2.0;
+    // get 1/sqrt(error) posterior mean and put it on the diagonal
+    double tempd = 1.0 / sqrt(b_post) * exp(lgamma((2.0 * a_post + 1.0) / 2.0) - lgamma(a_post));
+    uhat(i,i) = tempd;
+    // scale the coefficients and fill them into the sparse matrix accordingly
+    for (int j = 0; j < gind.n_rows + 0.0; j++){
+      uhat(gind(j), i) = muhat(j) * tempd;
+    }
+  }
+  return uhat;
+}

@@ -84,3 +84,22 @@ minus_loglikeli_c <- function(thetas, datum, NNarray, threshh = 1e-3, negativ = 
     .Call(`_NPVecchia_minus_loglikeli_c`, thetas, datum, NNarray, threshh, negativ)
 }
 
+#' Creates MAP (maximum a posteriori) sparse matrix from thetas
+#' 
+#' This is basically a combination of thetas_to_priors, get_posts, and samp_posts so one does not
+#' have to store the posteriors in memory (that is more for Bayesian uses).
+#' 
+#' @param thetas 3 real numbers representing the three hyperparameters
+#' @param datum an N * n matrix of the data (N replications of n locations/variables)
+#' @param NNarray an n * m2 matrix giving the m nearest neighbors previous in the ordering (or
+#'   outputting NAs if not available [i.e. there are not m previous points]) that are ordered
+#'   from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
+#'   of the posterior means (i.e. number of columns in the third element of the posteriors), but
+#'   never have m2 < 2.
+#' @param threshh threshold for number of neighbors (for thetas_to_priors); defaults
+#'   to 1e-3
+#'   
+get_map <- function(thetas, datum, NNarray, threshh = 1e-3) {
+    .Call(`_NPVecchia_get_map`, thetas, datum, NNarray, threshh)
+}
+
