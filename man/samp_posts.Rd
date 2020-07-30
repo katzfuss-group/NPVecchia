@@ -4,7 +4,7 @@
 \alias{samp_posts}
 \title{Creates posterior mean sparse matrix from posteriors}
 \usage{
-samp_posts(posts, NNarray)
+samp_posts(posts, NNarray, bayesian = FALSE, uhat = TRUE)
 }
 \arguments{
 \item{posts}{a List of the posteriors from get_posts (or get_posts_c); alternatively it can be
@@ -15,6 +15,12 @@ outputting NAs if not available [i.e. there are not m previous points]) that are
 from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 of the posterior means (i.e. number of columns in the third element of the posteriors), but
 never have m2 < 2.}
+
+\item{bayesian}{a logical flag which defaults to FALSE. This controls if given the posteriors, it obtains
+the MAP estimate (when FALSE) or samples all non-zero entries of the U matrix (when TRUE).}
+
+\item{uhat}{a logical flag which defaults to TRUE. If FALSE and bayesian=TRUE, it will output a posterior
+sample of the data rather than the U matrix. If bayesian=FALSE, it is unused.}
 }
 \value{
 Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 

@@ -254,6 +254,10 @@ get_posts <- function(datum, priors, NNarray) {
 #' from closest to furthest away. It is OK to have m2 large, as it will be reduced to match the size
 #' of the posterior means (i.e. number of columns in the third element of the posteriors), but
 #' never have m2 < 2.
+#' @param bayesian a logical flag which defaults to FALSE. This controls if given the posteriors, it obtains
+#' the MAP estimate (when FALSE) or samples all non-zero entries of the U matrix (when TRUE).
+#' @param uhat a logical flag which defaults to TRUE. If FALSE and bayesian=TRUE, it will output a posterior
+#' sample of the data rather than the U matrix. If bayesian=FALSE, it is unused.
 #'
 #' @return Sparse triangular matrix that is the Cholesky of the precision matrix \eqn{\Omega} 
 #' such that \deqn{\Omega = U U'}
@@ -275,7 +279,7 @@ get_posts <- function(datum, priors, NNarray) {
 #' 
 #' uhat <- samp_posts(posteriors, NNarray)
 #' 
-samp_posts <- function(posts, NNarray) {
+samp_posts <- function(posts, NNarray, bayesian=FALSE, uhat=TRUE) {
   # get n, m
   n <- nrow(NNarray)
   m <- ncol(posts[[3]])
@@ -299,19 +303,52 @@ samp_posts <- function(posts, NNarray) {
     stop("Please use get_posts to generate the posteriors. Some of 
           the current posteriors have incorrect dimensions.")
   }
-  
-  # Get posterior mean of d and create the sparse matrix
-  d <- (1/sqrt(posts[[2]][1])) * exp(lgamma((2 * posts[[1]][1] + 1)/2) - lgamma(posts[[1]][1]))
-  uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
-  for (i in 2:n) {
-    # get nearest neighbors and number of them (nn)
-    gind <- na.omit(NNarray[i, 1:m])
-    nn <- length(gind)
-    # Fill in appropriate elements of sparse matrix with posterior means
-    uhat[i, i] <- (1/sqrt(posts[[2]][i])) * exp(lgamma((2 * posts[[1]][i] + 1)/2) - lgamma(posts[[1]][i]))
-    uhat[gind, i] <- posts[[3]][i, 1:nn] * uhat[i, i]
+  if(bayesian){
+    if(uhat){
+      n2 <- nrow(NNarray)
+      m <- ncol(NNarray)
+      d <- 1/sqrt(rinvgamma(1,posts[[1]][1], posts[[2]][1]))
+      # d <- rggamma(1, (1/sqrt(posts[[2]][1]))*posts[[1]][1], posts[[1]][1], 2)
+      uhat <- sparseMatrix(i=1,j=1,x=d, dims=c(n2,n2),triangular=TRUE)
+      for(i in 2:n2) {
+        gind <- na.omit(NNarray[i,])
+        nn <- length(gind)
+        d <- rinvgamma(1,posts[[1]][i], posts[[2]][i])
+        uhat[i,i] <- 1/sqrt(d)
+        uhat[gind,i] <- uhat[i,i]*mvrnorm(1, posts[[3]][i,1:nn],d*tcrossprod(ginv(posts[[4]][1:nn,1:nn,i])))
+      }
+      return(uhat)
+    }else{
+      n2 <- nrow(NNarray)
+      m <- ncol(NNarray)
+      sample1 <- rep(0, n2)
+      d <- rinvgamma(1,posts[[1]][1], posts[[2]][1])
+      sample1[1] <- rnorm(1,0,sqrt(d))
+      # d <- rggamma(1, (1/sqrt(posts[[2]][1]))*posts[[1]][1], posts[[1]][1], 2)
+      for(i in 2:n2) {
+        gind <- na.omit(NNarray[i,])
+        nn <- length(gind)
+        d <- rinvgamma(1,posts[[1]][i], posts[[2]][i])
+        uhat <- mvrnorm(1, posts[[3]][i,1:nn],d*tcrossprod(ginv(posts[[4]][1:nn,1:nn,i])))
+        
+        sample1[i] <- rnorm(1, sum(uhat*(-sample1[gind])), sqrt(d))
+      }
+      return(sample1)
+    }
+  }else{
+    # Get posterior mean of d and create the sparse matrix
+    d <- (1/sqrt(posts[[2]][1])) * exp(lgamma((2 * posts[[1]][1] + 1)/2) - lgamma(posts[[1]][1]))
+    uhat <- sparseMatrix(i = 1, j = 1, x = d, dims = c(n, n), triangular = TRUE)
+    for (i in 2:n) {
+      # get nearest neighbors and number of them (nn)
+      gind <- na.omit(NNarray[i, 1:m])
+      nn <- length(gind)
+      # Fill in appropriate elements of sparse matrix with posterior means
+      uhat[i, i] <- (1/sqrt(posts[[2]][i])) * exp(lgamma((2 * posts[[1]][i] + 1)/2) - lgamma(posts[[1]][i]))
+      uhat[gind, i] <- posts[[3]][i, 1:nn] * uhat[i, i]
+    }
+    return(uhat)
   }
-  return(uhat)
 }
 
 #' Calculates the integrated log likelihood
