@@ -13,6 +13,7 @@ Imports:
   MASS,
   Matrix,
   matrixStats,
+  invgamma,
   Rcpp (>= 1.0.1)
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.0

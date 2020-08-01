@@ -1,7 +1,7 @@
 useDynLib(NPVecchia, .registration=TRUE)
 importFrom(Rcpp, evalCpp)
 exportPattern("^[[:alpha:]]+")
-importFrom("stats", "coef", "lm", "na.omit", "sd", "summary.lm")
+importFrom("stats", "coef", "lm", "na.omit", "sd", "summary.lm", "optim", "rnorm")
 importFrom("MASS", "ginv", "mvrnorm")
 importFrom("Matrix", "sparseMatrix", "tcrossprod")
 importFrom("fields", "rdist", "Matern", "Exponential")
