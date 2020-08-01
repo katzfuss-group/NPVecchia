@@ -89,7 +89,7 @@ order_mm_tapered <- function(locs, datum, tapering_range = 0.4){
 #' @export
 #'
 #' @examples
-#' #' n <- 100
+#' n <- 100
 #' d <- 3
 #' locationss <- matrix(runif(n * d), nc = d)
 #' ordering <- orderMaxMinFaster(locationss)

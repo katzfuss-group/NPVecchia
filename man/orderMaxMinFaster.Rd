@@ -21,7 +21,7 @@ Assumes Euclidean distance and finds maximin ordering. It is equivalent to \code
 but much faster.
 }
 \examples{
-#' n <- 100
+n <- 100
 d <- 3
 locationss <- matrix(runif(n * d), nc = d)
 ordering <- orderMaxMinFaster(locationss)
