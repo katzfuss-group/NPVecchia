@@ -84,12 +84,12 @@ orderByCoordinate <- function( locs, coordinate ){
 #' @param locs matrix of locations of points (to match input argument of fields::rdist)
 #' @param datum Data where column i corresponds to observations at the i'th point of locs
 #' @param tapering_range Percentage of the maximum distance for Exponential tapering, which
-#' defaults to 1/2 the maximum distance.
+#' defaults to 0.4 * the maximum distance.
 #' @param m number of neighbors
 #'
 #' @return a matrix of nearest neighbors of dimension n x m
 #' @export
-find_nn <- function(locs, datum, m, tapering_range = 0.5){
+find_nn <- function(locs, datum, m, tapering_range = 0.4){
     #Get location distances for tapering
     ds <- rdist(locs)
     #Tapering using exponential

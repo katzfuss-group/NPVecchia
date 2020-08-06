@@ -4,7 +4,7 @@
 \alias{find_nn}
 \title{Find nearest neighbors based on a tapered covariance matrix}
 \usage{
-find_nn(locs, datum, m, tapering_range = 0.5)
+find_nn(locs, datum, m, tapering_range = 0.4)
 }
 \arguments{
 \item{locs}{matrix of locations of points (to match input argument of fields::rdist)}
@@ -14,7 +14,7 @@ find_nn(locs, datum, m, tapering_range = 0.5)
 \item{m}{number of neighbors}
 
 \item{tapering_range}{Percentage of the maximum distance for Exponential tapering, which
-defaults to 1/2 the maximum distance.}
+defaults to 0.4 * the maximum distance.}
 }
 \value{
 a matrix of nearest neighbors of dimension n x m
