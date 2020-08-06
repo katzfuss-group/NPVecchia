@@ -306,7 +306,6 @@ samp_posts <- function(posts, NNarray, bayesian=FALSE, uhat=TRUE) {
   if(bayesian){
     if(uhat){
       n2 <- nrow(NNarray)
-      m <- ncol(NNarray)
       d <- 1/sqrt(rinvgamma(1,posts[[1]][1], posts[[2]][1]))
       # d <- rggamma(1, (1/sqrt(posts[[2]][1]))*posts[[1]][1], posts[[1]][1], 2)
       uhat <- sparseMatrix(i=1,j=1,x=d, dims=c(n2,n2),triangular=TRUE)
@@ -320,8 +319,7 @@ samp_posts <- function(posts, NNarray, bayesian=FALSE, uhat=TRUE) {
       return(uhat)
     }else{
       n2 <- nrow(NNarray)
-      m <- ncol(NNarray)
-      sample1 <- rep(0, n2)
+      sample1 <- rep(0, n)
       d <- rinvgamma(1,posts[[1]][1], posts[[2]][1])
       sample1[1] <- rnorm(1,0,sqrt(d))
       # d <- rggamma(1, (1/sqrt(posts[[2]][1]))*posts[[1]][1], posts[[1]][1], 2)
@@ -461,4 +459,71 @@ minus_loglikeli <- function(thetas, datum, NNarray, threshh = 1e-3, negativ = TR
   # Return the negative of the log integrated likelihood
   loglikelihood <- ifelse(negativ, -1, 1)*c(loglikelihood)
   return(loglikelihood)
+}
+
+#' Wrapper to get the MAP given data
+#' 
+#' This wraps all of the smaller functions into one simple function to compute the MAP estimate of the
+#' upper Cholesky of the precision matrix. 
+#'
+#'
+#' @param datum an N * n matrix of the data (N replications of n locations/variables)
+#' @param locs an n*d matrix of data locations(to match input argument of fields::rdist)
+#' @param corr_order logical flag (defaults to TRUE). If true, uses correlation ordering. Otherwise,
+#' it uses maximin ordering based on locations.
+#' @param tapering_range Percentage of the maximum distance for Exponential tapering, which
+#' defaults to 0.4 * the maximum distance.
+#' @param threshh threshold for number of neighbors (for thetas_to_priors); defaults to 1e-3
+#' @param max_m number of neighbors to compute initially; a maximum number of neighbors possible for
+#' the methodology
+#' @param init_theta the initialization of the optimization to find the optimal theta
+#'
+#' @return A list of two elements: 1) u -- a sparse triangular matrix that is the Cholesky of the precision 
+#' matrix \eqn{\Omega} such that \deqn{\Omega = U U'} and 2) the order of the data that was used to 
+#' calculate it (i.e. the reordered data is approximately normal with mean 0 and precision \eqn{\Omega})
+#' @export
+#'
+#' @examples
+run_npvecchia <- function(datum, locs, corr_order = T, tapering_range = 0.4, threshh = 1e-3, max_m = 50,
+                    init_theta = c(1,-1,0)){
+  #get N/n from datum
+  N <- nrow(datum)
+  n <- ncol(datum)
+  #Check that locations is correct dimensions
+  if(nrow(locs) != n){
+    stop("The number of locations does not match the data!")
+  }
+  #correlation ordering or else maximin ordering
+  if(corr_order){
+    #Get distances between locations
+    ds <- rdist(locs)
+    #Taper exponential * sample cov
+    exp_const <- Exponential(ds, range = (tapering_range * max(ds)))
+    cov_matrix <- cov(datum) * exp_const
+    #Covariance matrix to a distance matrix
+    temp <- 1 - cov2cor(cov_matrix)
+    orderd <- order_maximin_dist(temp)
+    
+    #reorder data
+    datum <- datum[, orderd]
+    
+    #Get NN matrix
+    NNarray <- find_nn_dist(temp[orderd, orderd], max_m)
+    
+  }else{
+    #find mm ordering
+    orderd <- orderMaxMinFaster(locs)
+    #reorder data
+    datum <- datum[, orderd]
+    #get distances
+    temp <- rdist(locs[orderd, ])
+    #Get NN matrix
+    NNarray <- find_nn_dist(temp, max_m)
+  }
+  #Get optimal thetas
+  thetas_f <- optim(init_theta, minus_loglikeli_c, datum=datum, NNarray=NNarray, method="L-BFGS-B",
+                    lower=-6, upper=4)
+  #returns MAP estimate of sparse Cholesky of the precision
+  uhat <- get_map(thetas_f$par, datum, NNarray, threshh = threshh) 
+  return(list(u = uhat, order = orderd))
 }
