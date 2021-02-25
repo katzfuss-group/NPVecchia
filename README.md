@@ -31,7 +31,7 @@ You can install the development version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("the-kidd17/NPVecchia")
+devtools::install_github("the-kidd17/NPVecchia", auth_token = '9bb855b22568430e75d0163d0235a238dcdf28a1')
 ```
 
 ## Ordering
@@ -106,7 +106,7 @@ uhat <- get_map(thetas_f$par, dataa, nearest_neighbors)
 ### Bayesian Approach
 
 While no Metropolis sampler for the hyperparameters is provided,
-adaptMCMC::MCMC was used for our experiments and seemed to work.
+adaptMCMC::MCMC was used for our experiments and works well.
 
 ``` r
 #A scale matrix similar to this worked well for our application

@@ -96,7 +96,7 @@ uhat <- get_map(thetas_f$par, dataa, nearest_neighbors)
 
 ### Bayesian Approach
 
-While no Metropolis sampler for the hyperparameters is provided, adaptMCMC::MCMC was used for our experiments and seemed to work.
+While no Metropolis sampler for the hyperparameters is provided, adaptMCMC::MCMC was used for our experiments and works well.
 
 ```{r warning=FALSE}
 #A scale matrix similar to this worked well for our application
