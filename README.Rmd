@@ -59,8 +59,9 @@ order1 <- orderMaxMinFaster(locs)
 #Correlation ordering
 order2 <- order_mm_tapered(locs, dataa)
 
-#Reorder data by correlation ordering
+#Reorder data and location by correlation ordering
 dataa <- dataa[, order2]
+locs <- locs[order2, ]
 ```
 
 ## Neighbors
