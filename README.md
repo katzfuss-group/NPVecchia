@@ -32,6 +32,7 @@ You can install the development version from
 ``` r
 # install.packages("devtools")
 devtools::install_github("katzfuss-group/NPvecchia")
+# library(NPvecchia)
 ```
 
 ## Ordering
