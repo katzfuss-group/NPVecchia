@@ -31,7 +31,7 @@ You can install the development version from
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("the-kidd17/NPVecchia", auth_token = '9bb855b22568430e75d0163d0235a238dcdf28a1')
+devtools::install_github("katzfuss-group/NPvecchia")
 ```
 
 ## Ordering
