@@ -36,7 +36,7 @@ thetas_to_priors <- function(thetas, n, thresh = 1e-3) {
   # warn if thetas are not in safe range
   if(any(thetas > 4) || any(thetas < -6)){
     warning("A theta being too large/small will probably cause numerical issues.")
-  }
+  } 
   # Inverse-gamma scale prior parameter vector (prior on variances)
   b <- 5 * exp(thetas[[1]]) * (1 - exp(-exp(thetas[[2]])/sqrt(0:(n - 1))))
   # Inverse-gamma shape prior parameter vector (prior on variances)
