@@ -78,7 +78,7 @@ similarly analogous to order\_maximin\_dist.
 #Correlation neighbors
 nearest_neighbors <- find_nn(locs, dataa, m = n_locs)
 #Euclidean neighbors
-nearest_neighbors2 <- find_nn_dist(fields::rdist(dataa), n_locs)
+nearest_neighbors2 <- find_nn_dist(fields::rdist(locs), n_locs)
 ```
 
 ## Details
