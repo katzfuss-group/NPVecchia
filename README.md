@@ -10,7 +10,7 @@
 The goal of NPVecchia is to provide users with scalable Gaussian Process
 (GP) covariance estimation without assuming a parametric form. We assume that the
 GP is de-trended (has zero mean) and that the covariance between points
-decreases with some kind of distance. The methodology is described in https://arxiv.org/abs/2012.05967.
+decreases with some kind of distance. The methodology is described in https://doi.org/10.1214/21-BA1273.
 
 **TL;DR** This method reorders the data and computes a sparse estimate Û
 of the inverse of the Cholesky of the (reordered) covariance matrix such
