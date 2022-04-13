@@ -138,3 +138,7 @@ sampled <- apply(samp$samples,1,function(thetas_temp){
   sample1
 })
 ```
+
+### Additional Code
+
+While not included in the package, there is some code based on discussions for the paper rejoinder in R/rejoinder_functionality.R. It contains three functions that  construct a prior to shrink towards a known covariance function, the slightly changed posterior calculations with these new priors, and prediction intervals at new locations based on the known prior covariance function. 
